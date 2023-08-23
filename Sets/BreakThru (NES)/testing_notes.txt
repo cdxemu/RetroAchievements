@@ -1,0 +1,71 @@
+Misc Testing Notes
+------------------
+Stage Names: "Mountain", "Bridges", "Prairie", "City", "Recover the Aircraft"
+Goal: rescue the stolen PK430 Aircraft 800 miles away
+
+After game over/continue: score reset to 0, but remain at current stage/checkpoint
+After ending cutscene: game continues from Stage 1
+
+Min required jumps per stage: 3, 8?, 2, 0, 5
+
+Stage 1 sphere: XPos (Mem 0x00b3) = 16-17, YPos (Mem 0x0006) = 7 
+
+Demo Mode:
+Stage 1 (start of stage -> shoots a few times then crashes into rock, start of stage -> shoots ammo crate and falls off cliff, start of stage -> shoots a bunch of stuff then crashes into rock)
+
+Game Bugs/Unexpected Behavior
+-----------------------------
+* The "Stage Transition Indicator" (Mem 0x009e) still has value 0x01 (stage completed) at start of Stage 1 if you continue playing after the game ending
+(affects Stage 1 challenges - fixed by adding Mem 0x00b3 > 0 check)
+
+* Player's last life is decremented at the Game Over screen (on the first frame) rather than in the stage
+(affects "Unbreakable" challenges - fixed by adding ResetNextIf/AndNext that checks if the current stage # switched to the Game Over screen value) 
+
+* After a game over, the demo starts playing from your last checkpoint! (but only once - in fact, the player can no longer continue their game after the demo plays once)
+(this implies that most, if not all, achievements should have demo protection, rather than just early Stage 1)
+
+Power-ups (Mem 0x00b3 positions)
+--------------------------------
+Stage, Type, StartXPos, EndXPos (approx. maximum - varies based on scrolling speed)
+1, short, 0c, 10
+2, short, 0f, 14
+2, infinite, 2f, 34
+3, short, 05, 0a
+3, infinite, 0f, 15
+3, short, 17, 1d
+4, short, 08, 0d
+4, long, 15, 1a
+4, extra life, 19, 1e
+4, extra life, 25, 2a
+5, long, 09, 0e
+
+Enemy/obstacle "IDs" (Mem 0x002b)
+---------------------------------
+Incomplete - I just ran through the game shooting everything and documented what I found. Might not actually be IDs, but they are the value stored on collision with the player/player's bullet. 
+
+ammo crate: 3215
+armored buggy: 987b
+armored car: 5336, 5639, 593c, bc9f, c2a5
+drum can: 6e51
+extra life power-up: 2003
+fire mobile: aa8d, a78a, b093, d1b4
+fuel barrel: a184
+helicopter/heli missile: 2205, 2508, e0c3, e3c6, eccf, efd2, f2d5
+infantryman: 4427, 472a, 4a2d
+infinite power-up: 2306
+jeep: 5c3f, 5f42, 8f72, 9275, 9578, c8ab
+land mine: 3518
+land mine remains: b99c
+large vehicle (tank) remains: 16f9, 1cff
+long power-up: 290c
+missile: 0aed, dabd
+missile armored car: 8c6f, 896c
+radar car: 684b, 6b4e
+regular-size vehicle/obstacle remains: 04e7
+rock: 3b1e
+rock remains: 4124
+short power-up: 2609
+tank: 7154, 7457, 775a, 7a5d
+truck: 4d30
+turret (unofficial name): b699
+unknown/unsure: 19fc (tank?), 3e21 (something at end of Stage 1?), 5033 (truck/jeep?), f8db (ammo crate?), fdbe (jeep/armored car/ammo crate?)

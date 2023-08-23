@@ -1,0 +1,59 @@
+Initial Plan (Completed)
+------------------------
+Basic Progression:
+* Beat Stage 1
+* Beat Stage 2
+* Beat Stage 3
+* Beat Stage 4
+* Beat Stage 5 / Win
+
+Collection:
+* Collect a 15 second weapon power-up
+* Collect a 30 second weapon power-up
+* Collect an infinite weapon power-up
+* Collect the 1st extra life power-up
+* Collect the 2nd extra life power-up
+* Earn 20,000 points to be awarded an extra life
+
+Enemies/Optional Stuff:
+* Destroy the fuel barrel in Stage 5 (also added ammo crate and drum can)
+
+Challenges:
+* Collect a weapon power-up while a weapon power-up is already active (in Stage 3)
+* Collect the infinite weapon power-up in Stage 2 and finish the stage without dying
+* Earn 50,000 points
+
+Per-Stage Challenges (5 of each):
+* Pacifist - beat without killing any enemies or destroying obstacles
+* Few Deaths - beat Stage 1 without dying, Stage 2-5 with less than 3 deaths each
+
+Added Later
+-----------
+Basic Progression:
+* Get past the first rockslide in Stage 1
+* Get past the pond in Stage 3
+
+Challenges:
+* Earn 100,000 points
+
+
+Initial Plan (Rejected)
+-----------------------
+(too hard/tedious or too many challenges already)
+Challenges:
+* Beat the game without using any continues
+
+Per-Stage Challenges:
+* Minimum Jumps - beat with only the minimum required number of jumps
+* Max Speed - beat traveling at the fastest vehicle speed for most of the stage
+* Full Clear - beat while killing all enemies and destroying all obstacles (except helicopters/missiles/windows)
+* Beat each stage without any vertical movement (excluding Stage 2)
+
+
+Initial Plan (Cut)
+------------------
+(was unable to find any memory addresses for enemy health/kills)
+Enemies/Optional Stuff:
+* Kill X number of each enemy type (in one game? one level?)
+* Kill/destroy certain enemies/obstacles by running them over
+* Shoot the sphere in Stage 1 at least 10 times (just for fun - it does nothing but only appears once in the game)
