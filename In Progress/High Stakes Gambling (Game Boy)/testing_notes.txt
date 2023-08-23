@@ -1,0 +1,192 @@
+TODO:
+finish any TODOs in rascript code
+measured/trigger conditions?
+replace basic slots criteria from "2 lines" to "combined payout of at least 10x your bet"?
+Leaderboards - each mission: winnings/remaining DPP, game end: total winnings, craps?
+test for false triggers on loading password + password protection
+change Practice cheevos (except Craps) to either mode?
+consider making Challenges be vs. specific gangster (for variety)?
+add GB Bios protection https://docs.retroachievements.org/Console-Specific-Tips/#gb-and-gbc-bios
+should "Current Mission Winnings" be included in RP/achievements?
+
+Alternative to "any gangster" challenges:
+Max		use no cheats			(10)
+Sam		cash out				(10)
+Harry	use all cheats			(10)
+Louie	300K winnings?			(10) alt: time, DP out, lose first three/win DP
+Al		win all casino games	(25)
+Take 2:
+Max		use no cheats			(10)
+Sam		300K winnings?			(10)
+Harry	use all cheats			(10)
+Louie	cash out				(10)
+Al		win all casino games	(25)
+
+Memory Digging TODO:
+need way to reliably identify "hand/spin started/ended" that also works on the first & last hand/spin - also might need "poker 1st draw vs. 2nd draw"
+find cheat used (player and oppponent)? - otherwise can watch for quantity decrease
+
+Unused Titles:
+Practice Mode "Academy"
+"Goombah"
+"Bootlegger Boot to Face"
+"Well Done" / "Medium Rare"
+
+Playthrough Results:
+M1-R1		W		$59750
+M1-R2		L		$59777
+M1-R3		W		$76550
+M1-R4		W (CO)	$109790
+M2-PW		Total:	$109790		FKbJPF BbJPFB
+M2-R1		W		$60500
+M2-R2		W		$71499
+M2-R3		W		$140599
+M2-R4		W (DP)	$121509
+M3-PW		Total:	$231299		C9H34F BF?CKB
+M3-R1		W		$60250
+M3-R2		W		$70950
+M3-R3		W		$370136
+M3-R4		W (DP)	$272286
+M4-PW		Total:	$503585		HGb?ML BC7PTB
+M4-R1		L		$45000
+M4-R2		W		$55300
+M4-R3		W		$333805
+M4-R4		W (DP)	$356605
+M5-PW		Total:	$860190		DQ$K?N BbBL8B
+M5-R1		L		$48500
+M5-R2		W		$57450
+M5-R3		W		$336834
+M5-R4		W (CO)	$353934
+M5-End		Total:	$1214124
+
+Casino Game Order of Events
+---------------------------
+Video Poker:
+* Before Game Starts
+	"Current Casino Game" set to Video Poker
+* [Competitive Mode] Entry Fee
+	Entry Fee/Ante Display Screen displayed and "Game Flow Control" set
+	"Current Mission Cash Total" decremented $1000 each frame until Entry Fee amount accounted for
+	"Players Cash" and "Opponent's Cash" set to Entry Fee amount
+* Start of Game
+	"Game Flow Control" set to Video Poker Gameplay
+* Start of Hand
+	(Frame 1) "Hand Number" set (starts at 1, [Practice Mode] or next hand number if had previous progress), "Card 1-5 Held" set to 0, "Hand Ranking" and "Card 1-5" are NOT reset
+	(Frame 7?) "Card Count" set to 0, "Actual Payout" set to 0
+* [Competitive Mode] Shady
+	(if Hand 6) See Shady? Yes/No menu
+	(if Hand 1/6) Shady init - "Game Flow Control" set to Shady
+	(if Hand 1/6) Shady init - "Card 1-5 Held" set to Shady values
+	(if Hand 1/6) Shady shopping - "Cheat Card 1-5 Quantity" and "Cash" set on each purchase
+	(if Hand 1/6) Shady exit - "Card 1-5 Held" set back to 0
+	(if Hand 1/6) Shady exit - "Game Flow Control" set back to Video Poker Gameplay
+	Play menu (if Hand 1/6 - Play/Shady menu)
+* 1st Draw
+	"Card Count" set to 5, "Card 1-5" set (with face-down flag)
+	(Hand 1 only) "Jackpot" value first displayed on-screen (and starts counting up after this)
+	Betting - Waits for player to select bet amount/multiplier, [Practice Mode] can access Exit Menu, "Cash" set with each multiplier increment
+	"Hand Ranking" set, "Card 1-5" face-up flag set
+	Face-up cards revealed to player
+* [Competitive Mode] Swap Card
+	Opponent AI decision-making? - "Hand Ranking" and "Card 1-5" set many times (for both Player/Opponent)
+	Opponent card swap - "Hand Ranking" and "Card 1-5" set (for both Player/Opponent)
+	Player card selection - "Swap Card Player/Opponent Card Number" set, "Hand Ranking" and "Card 1-5" NOT set at this point
+	Player card swap - "Hand Ranking" and "Card 1-5" set (for both Player/Opponent), card alternates between face-up/face-down a few times and sets "Card 1-5" flag each time
+	(above repeats for Opponent/Player if they use 2nd Swap Card)
+* [Competitive Mode] Cheats
+	Play/Cheat menu - player can select Joker or See Next cheat
+	Player See Next - next card displayed
+	Player Joker card selection - "Hand Ranking" NOT set
+	Player Joker card swap - "Hand Ranking" and "Card 1-5" set
+* Held Cards Selection
+	Player selects held cards - "Card 1-5 Held" flags set when Hold button(s) clicked
+	Waits for player to press Draw button
+	Non-held cards become face-down and have their "Card 1-5" face-down flag set, all "Card 1-5 Held" set to 3
+* 2nd Draw
+	one-by-one (from L to R), each non-held card has "Card 1-5" set (with face-up flag) and then is revealed face-up to player
+* [Competitive Mode] Swap Card
+	same steps as in 1st Draw
+* Hand Evaluation/Payout
+	(Frame 1) "Hand Ranking" set
+	(Frame 2) "Actual Payout" set (includes Jackpot)
+	(if won) Payout Display - flashes display text with Hand Ranking and Payout $
+	(if won) "Cash" set
+* End of Hand
+	[Practice Mode] waits for player input, [Competitive Mode] (if Hand 1-9) Play menu
+	all cards turned face-down and "Card 1-5" face-down flag set (for both Player/Opponent)
+* [Competitive Mode] End of Game
+	"Card 1-5 Held" set to 0
+	music switched to win/loss music, "Cheat Card 1-5 Quantity" set to 0
+	(if won) Cash Prize Screen displayed and "Game Flow Control" set
+	(if won, when leaving Cash Prize screen) "Current Mission Games Won" set, "Cash" set to 0, "Current Mission Cash Total" set
+	(if lost, when leaving Video Poker screen) "Cash" set to 0, "Current Mission Cash Total" set
+	Score Card Screen displayed and "Game Flow Control" set
+	(when leaving Score Card screen) "Current Casino Game" set to Draw Poker
+
+Misc:
+Win Condition - 250K? (from Wikipedia article - probably wrong?)
+Slots Jackpot Odds:
+ 1/8000 	(without cheating)		0.0125%
+27/8000 	(gold coin)				0.3375%
+1/400  		(sevens bonus item)		0.25%
+9/400  		(both)					2.25%
+
+slots jackpot reel positions: 0070 0080 0130
+starting jackpot: $250000
+
+Memory Testing Scratchpad:
+		Seven	Bell	Bell2	Bell3	Melon	Bar		Plum	Orange	Guess
+0xd475	05		02		02		02		03		04		01		00		type?
+0xd479	04		02		02		01		03		05		01		00		type? (no?)
+0xd48d	20		04		04		04		08		10		02		01		cost in hundreds? (no) type?
+0xd4c6	01		00		00		00		00		13		01		01		unrelated?
+
+128-64-32-16-8-4-2-1
+7 6 5 4 3 2 1 0
+---------------
+0 0 0 0 0 0 0 0		00 = initial value before starting casino game
+0 0 0 0 1 0 0 0		08 = lose or not yet determined
+0 0 0 0 1 0 0 1		09 = bust
+0 0 0 0 1 0 1 0		0a = not yet determined (split)
+0 0 0 0 1 0 1 1		0b = bust (split)
+0 0 0 0 1 1 0 0		0c = lose (doubled down)
+0 0 0 0 1 1 0 1		0d = bust (doubled down)
+1 0 1 0 0 0 0 0		a0 = inactive split hand "push"
+1 0 1 0 1 0 0 0		a8 = win
+1 0 1 0 1 0 0 1		a9 = blackjack
+1 0 1 0 1 0 1 0		aa = win (split)
+1 0 1 0 1 0 1 1		ab = BJ (split)
+1 0 1 0 1 1 0 0		ac = win (doubled down)
+1 1 0 0 0 0 0 0		c0 = inactive split hand "win"
+1 1 0 0 1 0 0 0		c8 = push
+1 1 0 0 1 0 1 0		ca = push (split)
+1 1 0 0 1 1 0 0		cc = push (doubled down)
+
+				VPExit
+		Copyr	Title	PracComp	PlayPass	PracMenu	PracHand	BJExit	SlotExit	CrapMenu	Shady	ShadEx	BJAct	PreChea	PlayHand	OpHand	Cheat	SeeNext	SwapCard	BJAct2	SlotAct	DPAct	VPAct	VPSwap	PracIns	CompIns	
+0xc2b9	00		10		0a			09			10			09			11		13			11			05		0b		11		11		0f			0f		11		0a		11			11		12		11		11		11    	11		11		
+0xc2ba	00		04		00			00			01			0d			00		00			00			01		0f		0e		0c		0d			00		08		08		0d			0f		00		0e		0e		09    	00		0b		
+0xc2bc	00		0d		13			13			12			13			05		04			0d			06		13		13		13		13			06		13		0b		13			14		05		13		13		13    	08		13		
+0xc2bd	00		0c		07			07			01			05			10		10			0e			03		09		0e		0f		0b			0b		0b		06		0e			10		0f		10		0f		0f    	0f		0f		
+
+0xc2b9
+(8-bit) Unknown Menu Property (1)?
+00 = Copyright Screen
+05 = Shady Shopping
+09 = Play/Password Select, Practice BJ Hand
+10 = Title Screen, Practice Game Select
+11 = Practice BJ/VP Exit, Practice Craps Options/Exit, Competitive BJ/VP/DP Play/Shady/Cheat, Cheat Selection, Swap Card Selection, Insurance Yes/No, VP Swap Card Yes/No
+12 = Competitive Slots Play/Shady/Cheat
+13 = Practice Slots Exit
+0a = Mode Select, See Next Card Display
+0b = Shady Exit
+0f = Competitive BJ/DP Player/Opponent Hand
+(Unmodified/Keeps Prev Value) = non-menu Casino Game gameplay, Password Screen, Cutscenes, Cash Display, Gangster Portrait, Entry Fee/Ante Display
+
+0xc2ba - UNFINISHED
+(8-bit) Unknown Menu Property (2)?
+00 = Copyright Screen, Mode Select, Play/Password Select
+01 = Practice Game Select
+04 = Title Screen
+0d = Practice BJ Hand
+(Unmodified/Keeps Prev Value) = same as 0xc2b9
