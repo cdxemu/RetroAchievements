@@ -21,6 +21,12 @@ Sam		300K winnings?			(10)
 Harry	use all cheats			(10)
 Louie	cash out				(10)
 Al		win all casino games	(25)
+Take 3:
+Max		use no cheats			(10)
+Sam		use all cheats			(10)
+Harry	cash out in BJ			(10) - seems quite hard and luck-based, might be better as any mission, alt: 350K winnings? win two jackpots?
+Louie	cash out in DP			(10) - pretty easy, might be better as any mission
+Al		win all casino games	(25)
 
 Memory Digging TODO:
 need way to reliably identify "hand/spin started/ended" that also works on the first & last hand/spin - also might need "poker 1st draw vs. 2nd draw"
@@ -123,6 +129,44 @@ Video Poker:
 	Score Card Screen displayed and "Game Flow Control" set
 	(when leaving Score Card screen) "Current Casino Game" set to Draw Poker
 
+Craps:
+* Game Started
+	"Current Casino Game" set to Craps
+	"Player's Cash" set
+	"Is Player's Turn" set to 1, "Currently Displayed Payout Amount" set to 0, "Combined Dice Roll" set to 2
+* Set Bet Amount
+	"Is Player's Turn" set to 0
+	"Showing Bet Results" set to 0001, "Last Bet - Total Bet Amount" set to 0
+	(as player changes amount) "Current Bet Amount" set
+* First Turn Started
+	"Is Player's Turn" set to 1
+* Bet Placed
+	"Player's Cash" decreased
+	"<Bet Type> Bet Amount" and "Last Bet - Total Bet Amount" set
+* Roll
+	"Combined Dice Roll", "Die 1 Roll", and "Die 2 Roll" set, "Is Player's Turn" set to 0
+	dice animation displayed
+* Bet Resolution - for each bet won/lost on current roll
+	(if no bets won/lost but point number set)
+		"Table Being Updated" set to 80
+	(if lost)
+		"<Bet Type> Bet Amount" and "Currently Displayed Payout Amount" reset to 0, "Table Being Updated" set to 80
+		text displayed: "lose <Bet Type>", screen starts scrolling to bet token
+		"Showing Bet Results" set to 100c
+		bet token moves to top of screen before disappearing
+	(if won)
+		"Last Payout" and "Currently Displayed Payout Amount" set
+		text displayed: "win <Bet Type>" and flashing payout amount, screen starts scrolling to bet token
+		"<Bet Type> Bet Amount" reset to 0, "Player's Cash" increased (bet amount refunded)
+		"Showing Bet Results" set to 100c
+		"Player's Cash" increased (payout amount), bet token moves to top of screen before disappearing
+		"Currently Displayed Payout Amount" reset to 0
+* End of Roll
+	"Is Player's Turn" set to 1, "Table Being Updated" reset to 00, (only if sevened out?) "Last Bet - Total Bet Amount" reset to 1 
+* End of Bet Resolution
+	"Showing Bet Results" reset to 0001
+* (Repeats from Bet Placed/Roll)
+
 Misc:
 Win Condition - 250K? (from Wikipedia article - probably wrong?)
 Slots Jackpot Odds:
@@ -190,3 +234,9 @@ Memory Testing Scratchpad:
 04 = Title Screen
 0d = Practice BJ Hand
 (Unmodified/Keeps Prev Value) = same as 0xc2b9
+
+Game Bugs/Unexpected Behavior
+-----------------------------
+* Blackjack: Being dealt 8+ cards causes unique display where only 5 cards are shown, with a number representing the hidden cards point value to the left
+* Blackjack: "Player's Hand Card 1-8" are not cleared out after each hand, only overwritten individually as you are dealt new cards
+* Blackjack: (probably a game rule, not a bug) Splitting Aces doesn't allow you to "Hit" (nor use Ace/King cheats), only "Stand/Cheat" on both hands
