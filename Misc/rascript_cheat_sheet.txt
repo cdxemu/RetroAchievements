@@ -1,5 +1,5 @@
 ****************************************
-         RAScript Cheat Sheet
+         RAScript Noob Cheat Sheet
 ****************************************
 prev         	->	Delta
 prior			->	Prior
@@ -15,3 +15,4 @@ tally        	->	AddHits, SubHits
 measured     	->	Measured (+MeasuredIf)
 trigger_when 	->	Trigger
 +, -, *, /		->	AddAddress - when used in mem access function, e.g., byte(0x001A + 0x08)
+bcd				->	BCD (address type - replaces Mem)

@@ -1,0 +1,21 @@
+Scoring:
+
+Points	Difficulty		Significance
+---------------------------------------------------------------
+0-5 	Easy 			Minor - Collect a power-up/beat a stage
+10 		Medium 			Intermediate - Beat a boss
+25 		Hard 			Major - Beat the game
+50 		Very Hard 		Game completion
+100 	"Impossible" 	Typically for bonus sets
+
+Difficulty Scale (my point approximations)
+1. Freebie (0-1)
+2. Easy (2-4)
+3. Medium (5)
+4. Med-hard (10)
+5. Hard (25)
+6. Very-Hard (50)
+7. Super-Hard (100)
+
+A good set balance on 50 cheeves: 4 freebies, 6 easy cheeves, 10 medium, 10 med-hard, 14 hard, 6 very-hard, 0 super-hard.
+(points = 4 + 18 + 50 + 100 + 350 + 300 = 822!)

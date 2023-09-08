@@ -1,32 +1,27 @@
 TODO:
-finish any TODOs in rascript code
-measured/trigger conditions?
-replace basic slots criteria from "2 lines" to "combined payout of at least 10x your bet"?
-Leaderboards - each mission: winnings/remaining DPP, game end: total winnings, craps?
-test for false triggers on loading password + password protection
-change Practice cheevos (except Craps) to either mode?
-consider making Challenges be vs. specific gangster (for variety)?
-add GB Bios protection https://docs.retroachievements.org/Console-Specific-Tips/#gb-and-gbc-bios
-should "Current Mission Winnings" be included in RP/achievements?
+Change "any gangster" challenges to be vs. specific gangster (variety pack)
+Max		use no cheats			(10)	-done
+Sam		use all cheats			(10)	-done
+Harry	win DP in <= 6 hands 	(10)	-not coded
+Louie	350K winnings?			(10)	-not coded
+Al		win all casino games	(25)	-needs trigger? (difficult to add - would need to redo implementation)
+Alt ideas: cash out in DP, win all DP hands, cash out in BJ (very rare/luck-based), lose first three/win DP, time limit, win two jackpots
 
-Alternative to "any gangster" challenges:
-Max		use no cheats			(10)
-Sam		cash out				(10)
-Harry	use all cheats			(10)
-Louie	300K winnings?			(10) alt: time, DP out, lose first three/win DP
-Al		win all casino games	(25)
-Take 2:
-Max		use no cheats			(10)
-Sam		300K winnings?			(10)
-Harry	use all cheats			(10)
-Louie	cash out				(10)
-Al		win all casino games	(25)
-Take 3:
-Max		use no cheats			(10)
-Sam		use all cheats			(10)
-Harry	cash out in BJ			(10) - seems quite hard and luck-based, might be better as any mission, alt: 350K winnings? win two jackpots?
-Louie	cash out in DP			(10) - pretty easy, might be better as any mission
-Al		win all casino games	(25)
+finish any TODOs in rascript code
+change Video Poker scoring events to both modes?
+measured/trigger conditions?
+Leaderboards - each mission: winnings/remaining DPP, game end: total winnings, craps?
+
+Done:
+test for false triggers on loading password + password protection
+test if need GB Bios protection https://docs.retroachievements.org/Console-Specific-Tips/#gb-and-gbc-bios
+
+Rejected:
+replace basic slots criteria from "2 lines" to "combined payout of at least 10x your bet"?
+change Practice cheevos (except Craps) to either mode?
+should "Current Mission Cash Total" be included in "Cash Winnings" RP/achievements?
+	-at end of mission: (same frame) "Player's Cash" zeroed out, "Player's Current Mission Cash Total" and "Player's Mission 1 Cash Winnings" set (amount duplicated!)
+	-at start of next mission: "Player's Current Mission Cash Total" reset to 50K
 
 Memory Digging TODO:
 need way to reliably identify "hand/spin started/ended" that also works on the first & last hand/spin - also might need "poker 1st draw vs. 2nd draw"
@@ -172,8 +167,8 @@ Win Condition - 250K? (from Wikipedia article - probably wrong?)
 Slots Jackpot Odds:
  1/8000 	(without cheating)		0.0125%
 27/8000 	(gold coin)				0.3375%
-1/400  		(sevens bonus item)		0.25%
-9/400  		(both)					2.25%
+1/400  		(sevens bonus item)		0.25%		- actually might be more because not only does it make 1 column auto-win (accounted for), you can choose the column based on which one is losing (not accounted for)
+9/400  		(both)					2.25%		- actually might be more because not only does it make 1 column auto-win (accounted for), you can choose the column based on which one is losing (not accounted for)
 
 slots jackpot reel positions: 0070 0080 0130
 starting jackpot: $250000
@@ -237,6 +232,7 @@ Memory Testing Scratchpad:
 
 Game Bugs/Unexpected Behavior
 -----------------------------
-* Blackjack: Being dealt 8+ cards causes unique display where only 5 cards are shown, with a number representing the hidden cards point value to the left
-* Blackjack: "Player's Hand Card 1-8" are not cleared out after each hand, only overwritten individually as you are dealt new cards
-* Blackjack: (probably a game rule, not a bug) Splitting Aces doesn't allow you to "Hit" (nor use Ace/King cheats), only "Stand/Cheat" on both hands
+* Blackjack: (not a bug - seems intended) Being dealt 8+ cards causes unique display where only 5 cards are shown, with a number representing the hidden cards point value to the left
+* Blackjack: (not a bug - implementation detail) "Player's Hand Card 1-8" are not cleared out after each hand, only overwritten individually as you are dealt new cards
+* Blackjack: (not a bug - seems intended) Splitting Aces doesn't allow you to "Hit" (nor use Ace/King cheats), only "Stand/Cheat" on both hands
+* Craps: (probably a bug) "Any Craps" bet remains in play after winning it (but not after sevening out)
