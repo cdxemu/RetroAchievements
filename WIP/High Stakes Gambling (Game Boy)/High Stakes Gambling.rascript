@@ -92,7 +92,7 @@ function ControllerInputAFlag() => bit0(0x00C2AE)
 function CurrentCasinoGame() => byte(0x00C2B1)
 CurrentCasinoGameDict = {"Blackjack": 0x01, "Craps": 0x02, "DrawPoker": 0x04, "Slots": 0x08, "VideoPoker": 0x10}
 
-// $C2B2: [8-bit] Game Flow Control
+// $C2B2: [8-bit] Game State
 //        (Note: The casino game gameplay is loaded for a moment before Shady.)
 //        00 = Video Poker Gameplay
 //        01 = Pre/Post-Mission Cutscene, Post-Mission Score Display, Continue Screen
@@ -107,8 +107,8 @@ CurrentCasinoGameDict = {"Blackjack": 0x01, "Craps": 0x02, "DrawPoker": 0x04, "S
 //        0b = Score Card
 //        20 = Copyright Screen (appears before Title Screen)
 //        (Unmodified/Keeps Prev Value) = Slots/Craps Gameplay, Practice Game Select, Credits, Pre-Mission Cash Display, Out of Cash Screen
-function GameFlowControl() => byte(0x00C2B2)
-GameFlowControlDict = {"MissionScore": 0x01, "GangsterPortrait": 0x02, "ModeOrPlayPasswordSelect": 0x05, "Shady": 0x06, "TitleScreen": 0x09,
+function GameState() => byte(0x00C2B2)
+GameStateDict = {"MissionScore": 0x01, "GangsterPortrait": 0x02, "ModeOrPlayPasswordSelect": 0x05, "Shady": 0x06, "TitleScreen": 0x09,
     "ScoreCard": 0x0B, "CopyrightScreen": 0x20
 }
 
@@ -182,6 +182,13 @@ MenuTypeDict = {"ModeOrPlayPasswordSelect": 0x00, "CopyrightOrTitleScreen": 0x80
 //        (many other values not noted/used)
 function MenuCursorYPosition() => byte(0x00C2EF)
 MenuCursorYPositionDict = {"InsuranceYes": 0x90, "InsuranceNo": 0x98}
+
+// $C2F9: [8-bit] Draw Number
+//        (Video Poker/Draw Poker - set once all cards for the draw have been dealt)
+//        00 = initial value
+//        01 = 1st draw
+//        02 = 2nd draw
+function DrawNumber() => byte(0x00C2F9)
 
 // $CB45: [16-bit] Last Placed Bet Amount
 //        (Draw Poker - from either player or opponent; the last bet/bet raise, or zero if pass/see bet/call)
@@ -638,9 +645,9 @@ function PlayerWonHand_ThisFrame() {
     // Original version was just checking if Player's Cash increased, but would falsely trigger if player decreased their bet while choosing bet amount
     // Increased(PlayersCash())
     // Increased(PlayersActualPayout())
-}  
+}
 
-function IsAtScreen(screen) => GameFlowControl() == GameFlowControlDict[screen]
+function IsAtScreen(screen) => GameState() == GameStateDict[screen]
 function IsAtMenu(menu) => MenuType() == MenuTypeDict[menu]
 
 function StartedCasinoGameThisFrame(casino_game_name) {
@@ -658,8 +665,7 @@ function StartedCasinoGameThisFrame(casino_game_name) {
 
 function StartedMissionThisFrame() {
     // The Gangster Portrait screen seems to be the most consistent and easily identifiable way to determine a mission has started
-    return IsAtScreen("GangsterPortrait") &&
-           Changed(GameFlowControl())
+    return IsAtScreen("GangsterPortrait") && Changed(GameState())
 }
 
 function StartedCompetitiveModeThisFrame() {
@@ -668,8 +674,7 @@ function StartedCompetitiveModeThisFrame() {
 }
 
 function StartedCompetitiveModeNewGameThisFrame() {
-   return StartedCompetitiveModeThisFrame() &&
-          DisplayedMissionNumber() == 1
+   return StartedCompetitiveModeThisFrame() && DisplayedMissionNumber() == 1
 }
 
 function WonMissionThisFrame() {
@@ -690,7 +695,7 @@ function WonCompetitiveModeThisFrame() {
 //        // Beating the final casino game of the mission will show the mission score screen
 //        return IsAtScreen("MissionScore") &&
 //               // Only check at start to avoid false triggering because mission number will change partway through
-//               prev(GameFlowControl()) != GameFlowControlDict["MissionScore"]
+//               prev(GameState()) != GameStateDict["MissionScore"]
 //     else
 //        // Beating a preliminary casino game will show the score card screen
 //        return IsAtScreen("ScoreCard")
@@ -699,12 +704,25 @@ function WonCompetitiveModeThisFrame() {
 function UsedCompetitiveModePassword() {
     // Password protection: can check if have any password-loaded cash winnings, since any real password will have some
     // alternatively, we might be able to check if previously at password entry screen before game started, but I think it is difficult because
-    // that screen shares the same "Game Flow Control" value as the password display screen at the end of a mission
+    // that screen shares the same "Game State" value as the password display screen at the end of a mission
     // TODO (maybe): do we need to also protect against potential fake passwords with no cash winnings?
     return PlayersPasswordCashWinnings() > 0
 
     // Older version - not a reliable way to check (see code note for more info)
 //    return WasCompetitiveModePasswordUsed() == WasCompetitiveModePasswordUsedDict["NotUsed"]    
+}
+
+function Winnings(mission) {
+    if (mission == 1)
+        return PlayersMission1CashWinnings()
+    else if (mission == 2)
+        return PlayersMission2CashWinnings()
+    else if (mission == 3)
+        return PlayersMission3CashWinnings()
+    else if (mission == 4)
+        return PlayersMission3CashWinnings()
+    else if (mission == 5)
+        return PlayersMission5CashWinnings()
 }
 
 function TotalMissionWinnings() {
@@ -889,9 +907,7 @@ function SlotsPlayer_WonAtLeast2LinesThisFrame() {
            (SlotsPlayer_WonLineThisFrame(2) && SlotsPlayer_WonLineThisFrame(3))
 }
 
-function SlotsPlayer_WonAll3LinesThisFrame() {
-    return SlotsPlayer_WonLineThisFrame(1) && SlotsPlayer_WonLineThisFrame(2) && SlotsPlayer_WonLineThisFrame(3)
-}
+function SlotsPlayer_WonAll3LinesThisFrame() => SlotsPlayer_WonLineThisFrame(1) && SlotsPlayer_WonLineThisFrame(2) && SlotsPlayer_WonLineThisFrame(3)
 
 function SlotsPlayer_WonAnyLineWith(payout_type) {
     mult = SlotsPayoutMultiplierDict[payout_type]
@@ -966,9 +982,7 @@ function VideoPokerPlayer_HandScoringIncreasedThisFrame() {
 function VideoPokerPlayer_UsedSwapCardCheatThisFrame()   => Decreased(PlayersCheatCard2Quantity())
 function VideoPokerOpponent_UsedSwapCardCheatThisFrame() => Decreased(OpponentsCheatCard2Quantity())
 
-function DrawPoker_OpponentFolded() {
-    return OpponentsHandResult() == DrawPoker_HandResultDict["Fold"]
-}
+function DrawPoker_OpponentFolded() => OpponentsHandResult() == DrawPoker_HandResultDict["Fold"]
 
 function DrawPokerPlayer_LostHandThisFrame() {
     // Note: this function will not trigger upon losing final hand because hand number will not increase (but that is acceptable
@@ -994,9 +1008,7 @@ function DrawPokerOpponent_RaisedBetThisFrame() {
            LastPlacedBetAmount() > 0 && LastPlacedBetAmount() == OpponentsLastActualBetAmount() && Changed(LastPlacedBetAmount())
 }
 
-function PokerPlayer_WonWith(hand_type) {
-    return PlayersHandRankingType() == Poker_HandRankingTypeDict[hand_type]
-}
+function PokerPlayer_WonWith(hand_type) => PlayersHandRankingType() == Poker_HandRankingTypeDict[hand_type]
 
 function PokerPlayer_Has3Jokers() {
     JokerCard1 = PlayersHandCardRank1() == CardRankDict["Joker"]
@@ -1136,7 +1148,7 @@ function CrapsPlayer_LostAnyBetThisFrame() {
 // ************************************************************************************************
 
 // ----------------------------------------------
-// Introductory (Practice Mode) Achievements
+// Tutorial (Practice Mode) Achievements
 // ----------------------------------------------
 
 achievement("Blackjack Basics - Name of the Game", "[Practice/Blackjack] Score a Blackjack (two-card 21 - increases payout by half)", 1,
@@ -1173,8 +1185,8 @@ achievement("Slots Basics - One-Armed Banditry", "[Practice/Slots] Bet on all th
 
 achievement("Video Poker Basics - Can You Hold, Please?", "[Practice/Video Poker] Press the (H)old button underneath at least one card and have a higher-scoring hand on the second draw", 1,
     // Note: This does not track whether the hold button remained pressed, only that it was pressed at some point. Doing the former would be difficult 
-    // because the 2nd draw resets the "Card X Held" value to the same value (0x03) as if the hold were deselected by the player, and there doesn't seem
-    // to be a good way to detect when the Draw button was pressed, either.
+    // because the 2nd draw resets all 5 "Card X Held" addresses to the same value (0x03) as if the hold were deselected by the player, and there doesn't
+    // seem to be a good way to detect when the Draw button was pressed, either.
     IsPracticeMode() && IsPlayingVideoPoker() && once(PokerPlayer_IsAnyCardHeld()) && never(Increased(HandNumber())) &&
     VideoPokerPlayer_HandScoringIncreasedThisFrame()
 //    once(PokerPlayer_AtLeastTwoCardsWereHeld())
@@ -1231,7 +1243,7 @@ achievement("Craps Basics - Rollin', Rollin', Rollin'", "[Practice/Craps] Win at
 // ----------------------------------------------
 
 // Adds an achievement for winning the specified mission/casino game with the given title and points
-function AddAchievement_WinStage(mission, casino_game_num, ach_title, ach_points)
+function WinStageAchievement(mission, casino_game_num, ach_title, ach_points)
 {
     CasinoGameName = GetCasinoGameName(casino_game_num)
     if (casino_game_num == 4)
@@ -1246,30 +1258,30 @@ function AddAchievement_WinStage(mission, casino_game_num, ach_title, ach_points
 
 // Add achievements for winning each Competitive Mode mission/casino game
 // Mission 1 - Machine Gun Max
-AddAchievement_WinStage(1, 1, "Machine Gun Max, Meet Bulletproof Bob", 2)
-AddAchievement_WinStage(1, 2, "Just Call It Beginner's Luck", 2)
-AddAchievement_WinStage(1, 3, "Loserus Maximus", 2)
-AddAchievement_WinStage(1, 4, "Max Maxed Out", 5)
+WinStageAchievement(1, 1, "Machine Gun Max, Meet Bulletproof Bob", 2)
+WinStageAchievement(1, 2, "Just Call It Beginner's Luck", 2)
+WinStageAchievement(1, 3, "Loserus Maximus", 2)
+WinStageAchievement(1, 4, "Max Maxed Out", 5)
 // Mission 2 - Suitcase Sam
-AddAchievement_WinStage(2, 1, "Suitcase Shakedown", 3)
-AddAchievement_WinStage(2, 2, "I Do Not Lose Them, Sam-I-Am", 3)
-AddAchievement_WinStage(2, 3, "Sam Clubbed", 3)
-AddAchievement_WinStage(2, 4, "Unpacked Suitcase Sam", 5)
+WinStageAchievement(2, 1, "Suitcase Shakedown", 3)
+WinStageAchievement(2, 2, "I Do Not Lose Them, Sam-I-Am", 3)
+WinStageAchievement(2, 3, "Sam Clubbed", 3)
+WinStageAchievement(2, 4, "Unpacked Suitcase Sam", 5)
 // Mission 3 - Hitman Harry
-AddAchievement_WinStage(3, 1, "Harry's Not So Scary", 4)
-AddAchievement_WinStage(3, 2, "You're No Wizard, Harry", 4)
-AddAchievement_WinStage(3, 3, "Blood Money Transfusion", 4)
-AddAchievement_WinStage(3, 4, "Whacked the Hitman", 5)
+WinStageAchievement(3, 1, "Harry's Not So Scary", 4)
+WinStageAchievement(3, 2, "You're No Wizard, Harry", 4)
+WinStageAchievement(3, 3, "Blood Money Transfusion", 4)
+WinStageAchievement(3, 4, "Whacked the Hitman", 5)
 // Mission 4 - Lucky Louis
-AddAchievement_WinStage(4, 1, "Louis the Not-So-Great", 10)
-AddAchievement_WinStage(4, 2, "More Like Unlucky Louis, Amirite?", 5)
-AddAchievement_WinStage(4, 3, "You're Out of Luck, I'm Out of Time", 10)
-AddAchievement_WinStage(4, 4, "Louie, Louie, You Gotta Go", 10)
+WinStageAchievement(4, 1, "Louis the Not-So-Great", 10)
+WinStageAchievement(4, 2, "More Like Unlucky Louis, Amirite?", 5)
+WinStageAchievement(4, 3, "You're Out of Luck, I'm Out of Time", 10)
+WinStageAchievement(4, 4, "Louie, Louie, You Gotta Go", 10)
 // Mission 5 - Al Cologne
-AddAchievement_WinStage(5, 1, "Cologne Bolonga", 10)
-AddAchievement_WinStage(5, 2, "Say Hello to My Little Spend", 5)
-AddAchievement_WinStage(5, 3, "Nice Try, Wiseguy", 10)
-AddAchievement_WinStage(5, 4, "Ding, Don Done", 10)
+WinStageAchievement(5, 1, "Cologne Bolonga", 10)
+WinStageAchievement(5, 2, "Say Hello to My Little Spend", 5)
+WinStageAchievement(5, 3, "Nice Try, Wiseguy", 10)
+WinStageAchievement(5, 4, "Ding, Don Done", 10)
 
 achievement("Brought Down the Mob", "[Competitive/All Missions] Defeat all five gangsters without using a password", 25,
     WonCompetitiveModeThisFrame() && disable_when(UsedCompetitiveModePassword(), StartedCompetitiveModeNewGameThisFrame())
@@ -1370,18 +1382,18 @@ achievement("It's a Crowd", "[Competitive/Draw Poker] Win hand with 3 of a Kind 
     IsPlayingDrawPoker() && PlayerWonHand_ThisFrame() && PokerPlayer_WonWith("3OfKind")
 )
 
-achievement("Sit Up Straight & Don't Forget to Flush", "[Competitive/Draw Poker] Win hand with Straight (5x payout in Video Poker) or Flush (8x)", 4,
-    IsPlayingDrawPoker() && PlayerWonHand_ThisFrame() &&
+achievement("Sit Up Straight & Don't Forget to Flush", "[Any Mode/Any Poker] Win hand with Straight (5x payout in Video Poker) or Flush (8x)", 4,
+    IsPlayingPoker() && PlayerWonHand_ThisFrame() &&
     __ornext(PokerPlayer_WonWith("Straight") || PokerPlayer_WonWith("Flush"))
 )
 
-achievement("Now We're Talkin'", "[Competitive/Draw Poker] Win hand with Full House (20x payout in Video Poker) or 4 of a Kind (50x)", 5,
-    IsPlayingDrawPoker() && PlayerWonHand_ThisFrame() &&
+achievement("Now We're Talkin'", "[Any Mode/Any Poker] Win hand with Full House (20x payout in Video Poker) or 4 of a Kind (50x)", 5,
+    IsPlayingPoker() && PlayerWonHand_ThisFrame() &&
     __ornext(PokerPlayer_WonWith("FullHouse") || PokerPlayer_WonWith("4OfKind"))
 )
 
-achievement("Flushing With Style", "[Any Mode/Video Poker] Win hand with Straight Flush (100x payout) or Royal Flush (250x)", 10,
-    IsPlayingVideoPoker() && PlayerWonHand_ThisFrame() &&
+achievement("Flushing With Style", "[Any Mode/Any Poker] Win hand with Straight Flush (100x payout) or Royal Flush (250x)", 10,
+    IsPlayingPoker() && PlayerWonHand_ThisFrame() &&
     __ornext(PokerPlayer_WonWith("StraightFlush") || PokerPlayer_WonWith("RoyalFlush"))
 )
 
@@ -1389,15 +1401,11 @@ achievement("High Five!", "[Any Mode/Video Poker] Win the jackpot with 5 of a Ki
     IsPlayingVideoPoker() && PlayerWonHand_ThisFrame() && PokerPlayer_WonWith("5OfKind")
 )
 
-achievement("Putting It All Together", "[Practice/Craps] Win a line, multi-roll, and single-roll bet on the same dice roll without losing any bets that roll", 5,
+achievement("Putting It All Together", "[Practice/Craps] Win a line, multi-roll, and single-roll bet on the same roll (without any other bets on the table)", 5,
     IsPlayingCraps() && always_false() // TODO: implement this (disabled for now)
     // This is way too complex - generates over 1000 alt groups and slows RATools to a halt
 // && unless(CrapsPlayer_LostAnyBetThisFrame()) && never(StartedCrapsRollThisFrame()) &&
 //    CrapsPlayer_WonBetThisFrame("Any Line") && CrapsPlayer_WonBetThisFrame("Any Single") && CrapsPlayer_WonBetThisFrame("Any Multi")
-)
-
-achievement("Craptastic", "[Practice/Craps] Win multiple bets at once? (e.g. on a single roll, win at least 5? bets without losing any bets)", 5,
-    IsPlayingCraps() && always_false() // TODO: implement this (disabled for now)
 )
 
 // ----------------------------------------------
@@ -1445,21 +1453,13 @@ achievement("Frugal Strats", "[Competitive/Slots] Win at slots without buying an
 // Collection Achievements
 // ----------------------------------------------
 
-achievement("Depression-Era Millionaire", "[Competitive/Any Mission] Accumulate at least $1 million total end-of-mission winnings (excludes password-loaded winnings)", 10,
+achievement("Depression-Era Millionaire", "[Competitive/Any Mission] Accumulate at least $1 million total end-of-mission winnings (excludes password winnings)", 10,
     IsCompetitiveMode() && TotalMissionWinnings() > 1000000
 //    (TotalMissionWinnings() + PlayersCurrentMissionCashTotal())
 )
 
-achievement("High Stakes High Roller", "[Competitive/Any Mission] Accumulate at least $1.5 million total end-of-mission winnings (excludes password-loaded winnings)", 25,
+achievement("High Stakes High Roller", "[Competitive/Any Mission] Accumulate at least $1.5 million total end-of-mission winnings (excludes password winnings)", 25,
     IsCompetitiveMode() && TotalMissionWinnings() > 1500000
-)
-
-achievement("Cheatin' Pete", "[Competitive/Mission 2] Complete Mission 2 while buying out every cheat from Shady (twice per casino game, from 0 to max qty)", 10,
-    // We need to reset the count at the start of the mission (rather than just start the count, as done for "Honest Pete")
-    IsCompetitiveMode() && never(StartedMissionThisFrame()) && WonMissionThisFrame() &&
-    // Note: cannot use MeasuredIf to check if at Shady because the cheat qty can increase if player cancels out of a cheat (such as Swap Card) during gameplay,
-    // and we don't want to count that. (MeasuredIf would only limit when the count is displayed.)
-    measured(repeated(MaxCheatsPerMission, DisplayedMissionNumber() == 2 && IsAtScreen("Shady") && PlayerPurchasedCheatThisFrame()))
 )
 
 // ----------------------------------------------
@@ -1476,10 +1476,10 @@ achievement("What Big Hands You Have", "[Competitive/Blackjack] Have 8 cards in 
     IsCompetitiveMode() && IsPlayingBlackjack() && (PlayersHandCardCount() >= 8 || PlayersSplitHandCardCount() >= 8)
 )
 
-achievement("I Ain't Got All Day", "[Competitive/Blackjack] Save time by having your opponent run out of cash before Hand 10", 10,
-    IsCompetitiveMode() && PlayerWonCasinoGameThisFrame("Blackjack") && HandNumber() <= 9 &&
-    OpponentsCash() == 0 // this check is likely redundant because cash-out is the only way for the opponent to lose early
-)
+//achievement("I Ain't Got All Day", "[Competitive/Blackjack] Save time by having your opponent run out of cash before Hand 10", 10,
+//    IsCompetitiveMode() && PlayerWonCasinoGameThisFrame("Blackjack") && HandNumber() <= 9 &&
+//    OpponentsCash() == 0 // this check is likely redundant because cash-out is the only way for the opponent to lose early
+//)
 
 achievement("Knew When to Hold 'Em", "[Competitive/Draw Poker] When your opponent raises your bet, keep playing the hand and win it", 5,
     // TODO: Handle case where opponent makes bet, player calls or player bets/opponent calls, 2nd deal, then opponent makes bet (never raised)
@@ -1489,6 +1489,7 @@ achievement("Knew When to Hold 'Em", "[Competitive/Draw Poker] When your opponen
 )
 
 achievement("Rosetti No Spaghetti", "[Competitive/Draw Poker] Defeat any gangster in draw poker without losing a single hand", 10,
+    // TODO (maybe): change to Blackjack and exclude dealer BJ?
     IsCompetitiveMode() &&  PlayerWonCasinoGameThisFrame("Draw Poker") && disable_when(DrawPokerPlayer_LostHandThisFrame(), StartedMissionThisFrame())
 )
 
@@ -1498,15 +1499,35 @@ achievement("Honest Pete", "[Competitive/Mission 1] Complete Mission 1 without b
 //     disable_when(PlayerPurchasedCheat(false), StartedMissionThisFrame())
 )
 
+achievement("Cheatin' Pete", "[Competitive/Mission 2] Complete Mission 2 while buying out every cheat from Shady (twice per casino game, from 0 to max qty)", 10,
+    // We need to reset the count at the start of the mission (rather than just start the count, as done for "Honest Pete")
+    IsCompetitiveMode() && never(StartedMissionThisFrame()) && WonMissionThisFrame() &&
+    // Note: cannot use MeasuredIf to check if at Shady because the cheat qty can increase if player cancels out of a cheat (such as Swap Card) during gameplay,
+    // and we don't want to count that. (MeasuredIf would only limit when the count is displayed.)
+    measured(repeated(MaxCheatsPerMission, DisplayedMissionNumber() == 2 && IsAtScreen("Shady") && PlayerPurchasedCheatThisFrame()))
+)
+
+achievement("I Ain't Got All Day", "[Competitive/Mission 3] Complete Mission 3 in 6 hands or less of Draw Poker", 10,
+    IsCompetitiveMode() && DisplayedMissionNumber() == 3 && IsPlayingDrawPoker() && HandNumber() <= 6 && trigger_when(WonMissionThisFrame())
+)
+
+achievement("Name TBD", "[Competitive/Mission 4] Complete Mission 4 with at least 350K in cash winnings", 10,
+    IsCompetitiveMode() && DisplayedMissionNumber() == 4 && Increased(Winnings(4)) && Winnings(4) >= 350000 && measured(PlayersCurrentMissionCashTotal() >= 350000)
+)
+
 achievement("Al Cologne Now Sleeps With The Fishes", "[Competitive/All Missions] Defeat Al Cologne in all four casino games (in a single playthrough)", 25,
+    // TODO (maybe): rewrite as the reverse check (invalidate when a casino game lost, otherwise awarded at game end) so a trigger flag can be added?
     WonCompetitiveModeThisFrame() && PlayerWonAllCasinoGamesThisFrame()
 )
 
-//achievement("The Ultimate Stakes", "[Competitive/All Missions] Defeat all five gangsters without losing any casino games (nor using a password)", 50,
-//    // TODO (maybe): rewrite as the reverse check (invalidate when a casino game lost, otherwise awarded at game end) so a trigger flag can be added?    
+//achievement("The Ultimate Stakes", "[Competitive/All Missions] Defeat all five gangsters without losing any casino games (nor using a password)", 50,  
 //    // Count missions with all casino games won up to 5, reset at the start of competitive mode
 //    WonCompetitiveModeThisFrame() && repeated(5, PlayerWonAllCasinoGamesThisFrame()) && disable_when(UsedCompetitiveModePassword(), StartedCompetitiveModeNewGameThisFrame())
 //)
+
+achievement("Craptastic", "[Practice/Craps] Have exactly 9 bets on the table and win them all on the same roll", 10,
+    IsPlayingCraps() && always_false() // TODO: implement this (disabled for now)
+)
 
 achievement("Baby Needs New Shoes!", "[Practice/Craps] Starting with $10,000, double your money", 10,
     IsPlayingCraps() && once(PlayersCashBCD() == 0x10000) && PlayersCashBCD() >= 0x20000 && never(!IsPlayingCraps())
@@ -1553,7 +1574,7 @@ rich_presence_conditional_display(IsCompetitiveMode() && RP_IsBetweenMissions,
     "Mission {0}: {1} | Winnings: ${2}", RP_MissionNumber, RP_Gangster, RP_Winnings)
 
 // Display if playing Competitive Mode - Blackjack/Poker
-rich_presence_conditional_display(IsCompetitiveMode() && (IsPlayingBlackjack() || IsPlayingDrawPoker() || IsPlayingVideoPoker()),
+rich_presence_conditional_display(IsCompetitiveMode() && (IsPlayingBlackjack() || IsPlayingPoker()),
     "Mission {0}: {1} | Winnings: ${2} | Playing: {3} | 💰: ${4}", RP_MissionNumber, RP_Gangster, RP_Winnings, RP_CasinoGame, RP_Cash)
 
 // Display if playing Competitive Mode - Slots
@@ -1570,3 +1591,31 @@ rich_presence_conditional_display(IsPlayingSlots() || IsPlayingCraps(),
 
 // Display for any other screens (non-gameplay assumed b/c any gameplay should be handled by the conditionals above to print relevant info)
 rich_presence_display("[Gameplay Not Started]")
+
+// ************************************************************************************************
+//                                          Leaderboards
+// ************************************************************************************************
+function LB_Cash(mission, is_total) {
+    trigger = IsCompetitiveMode() && DisplayedMissionNumber() == mission && PlayerWonDrawPokerFlag() == 1 && Increased(Winnings(mission)) // WonMissionThisFrame()
+
+    if (is_total == true) {
+        title = "Total Cash Winnings (non-password)"
+        desc = "Highest cash total at end of game (excludes password winnings)"
+        winnings = TotalMissionWinnings()
+    }
+    else {
+        title = format("Mission {0} Cash Winnings", mission)
+        desc = format("Most cash won in Mission {0}", mission)
+        winnings = Winnings(mission)    
+    }
+
+    // Starts and submits on the same frame
+    leaderboard(title, desc, trigger, always_false(), always_true(), winnings)
+}
+
+LB_Cash(1, false)
+LB_Cash(2, false)
+LB_Cash(3, false)
+LB_Cash(4, false)
+LB_Cash(5, false)
+LB_Cash(5, true)
