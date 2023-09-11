@@ -2,24 +2,37 @@ TODO:
 Change "any gangster" challenges to be vs. specific gangster (variety pack)
 Max		use no cheats			(10)	-done
 Sam		use all cheats			(10)	-done
-Harry	win DP in <= 6 hands 	(10)	-not coded
-Louie	350K winnings?			(10)	-not coded
+Harry	win DP in <= 6 hands 	(10)	-untested
+Louis	350K winnings?			(10)	-untested/needs measured?
 Al		win all casino games	(25)	-needs trigger? (difficult to add - would need to redo implementation)
-Alt ideas: cash out in DP, win all DP hands, cash out in BJ (very rare/luck-based), lose first three/win DP, time limit, win two jackpots
+*maybe: add win 500K winnings against any gangster, replace 350K winnings w/ win all BJ (exclude dealer BJ and allow push 21 - need to decide how to handle split), and swap M3 & M4 "Rosetti No Spaghetti"
+Alt ideas: win all BJ (exclude dealer BJ) or DP hands, win X in a row BJ or DP hands, cash out in DP, cash out in BJ (very rare/luck-based), lose first three/win DP, time limit, win two jackpots
+
+change Craps achievement from "win multiple (5?) bets at once": determine how many can be possibly won at once to set appropriate number (depending on rarity) - 5 for craps, 6 for 6/8?, 9 for 7?
+
+Craps -  how to fix "too complex" achievements:
+count # of bets made at end of players turn - must be equal to X
+on AI turn, count/check winning bets
+
+Craps - need to also check if bet is "Off"?
+
+revise Poker achievements to use "Draw Number" where applicable
 
 finish any TODOs in rascript code
-change Video Poker scoring events to both modes?
-measured/trigger conditions?
-Leaderboards - each mission: winnings/remaining DPP, game end: total winnings, craps?
+redo scoring badges
+combine the practice slots/VP achievements (two each) into one each?
+more measured/trigger conditions?
+Leaderboards - each mission remaining DPP?, most cash in each casino game?, craps?
 
 Done:
+change Video Poker scoring events to both modes?
 test for false triggers on loading password + password protection
 test if need GB Bios protection https://docs.retroachievements.org/Console-Specific-Tips/#gb-and-gbc-bios
 
 Rejected:
 replace basic slots criteria from "2 lines" to "combined payout of at least 10x your bet"?
 change Practice cheevos (except Craps) to either mode?
-should "Current Mission Cash Total" be included in "Cash Winnings" RP/achievements?
+should "Current Mission Cash Total" be included in "Cash Winnings" RP/achievements? *NO*
 	-at end of mission: (same frame) "Player's Cash" zeroed out, "Player's Current Mission Cash Total" and "Player's Mission 1 Cash Winnings" set (amount duplicated!)
 	-at start of next mission: "Player's Current Mission Cash Total" reset to 50K
 
@@ -235,4 +248,4 @@ Game Bugs/Unexpected Behavior
 * Blackjack: (not a bug - seems intended) Being dealt 8+ cards causes unique display where only 5 cards are shown, with a number representing the hidden cards point value to the left
 * Blackjack: (not a bug - implementation detail) "Player's Hand Card 1-8" are not cleared out after each hand, only overwritten individually as you are dealt new cards
 * Blackjack: (not a bug - seems intended) Splitting Aces doesn't allow you to "Hit" (nor use Ace/King cheats), only "Stand/Cheat" on both hands
-* Craps: (probably a bug) "Any Craps" bet remains in play after winning it (but not after sevening out)
+* Craps: (bug or non-standard craps rules) some single-roll bets (Any Craps, Craps 2/3/12, Seven, Yoleven) remain in play after winning the bet (but not after losing it)
