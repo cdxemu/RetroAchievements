@@ -100,16 +100,16 @@ CurrentCasinoGameDict = {"Blackjack": 0x01, "Craps": 0x02, "DrawPoker": 0x04, "S
 //        04 = Cash Prize Display (after casino game, if player won)
 //        05 = Mode Select, Play/Password Select
 //        06 = Shady
-//        07 = Entry Fee/Ante Display, Slots Gameplay
+//        07 = Entry Fee/Ante Display, Competitive Slots Gameplay
 //        08 = Blackjack/Draw Poker Gameplay
 //        09 = Title Screen
 //        0a = Password Screen (both entry and display-only)
 //        0b = Score Card
 //        20 = Copyright Screen (appears before Title Screen)
-//        (Unmodified/Keeps Prev Value) = Slots/Craps Gameplay, Practice Game Select, Credits, Pre-Mission Cash Display, Out of Cash Screen
+//        (Unmodified/Keeps Prev Value) = Practice Slots/Craps Gameplay, Practice Game Select, Credits, Pre-Mission Cash Display, Out of Cash Screen
 function GameState() => byte(0x00C2B2)
-GameStateDict = {"MissionScore": 0x01, "GangsterPortrait": 0x02, "ModeOrPlayPasswordSelect": 0x05, "Shady": 0x06, "TitleScreen": 0x09,
-    "ScoreCard": 0x0B, "CopyrightScreen": 0x20
+GameStateDict = {"VideoPoker": 0x00, "MissionScore": 0x01, "GangsterPortrait": 0x02, "CashPrize": 0x04, "ModeOrPlayPasswordSelect": 0x05, "Shady": 0x06,
+    "CompetitiveSlots":0x07, "BlackjackOrDrawPoker": 0x08, "TitleScreen": 0x09, "ScoreCard": 0x0B, "CopyrightScreen": 0x20
 }
 
 // $C2B4: [8-bit] Combined Dice Roll
@@ -210,6 +210,10 @@ function PlayersMission5CashWinnings() => dword(0x00CB71)
 //        (Set when password loaded - total cash winnings from completed missions in password data)
 function PlayersPasswordCashWinnings() => dword(0x00CB75)
 
+// $CB8F: [8-bit] Dealer's Hand Card Count
+//        (Blackjack)
+function DealersHandCardCount() => byte(0x00CB8F)
+
 // $CBB2: [8-bit] Dealer's Hand Point Value
 //        (Blackjack)
 function DealersHandPointValue() => byte(0x00CBB2)
@@ -257,8 +261,10 @@ function PlayersHandResult() => byte(0x00CC0D)
 function PlayersHandResult_IsSpecialFlag() => bit0(0x00CC0D)
 function PlayersHandResult_IsSplitFlag() => bit1(0x00CC0D)
 function PlayersHandResult_IsDoubleFlag() => bit2(0x00CC0D)
-function PlayersHandResult_IsActiveFlag() => bit3(0x00CC0D)
+//function PlayersHandResult_IsActiveFlag() => bit3(0x00CC0D) // unneeded - main hand is always active
 function PlayersHandResult_IsWonFlag() => bit5(0x00CC0D)
+function PlayersHandResult_IsTiedFlag() => bit6(0x00CC0D)
+function PlayersHandResult_IsWonOrTiedFlag() => bit7(0x00CC0D)
 DrawPoker_HandResultDict = {"Fold": 0x09}
 
 // $CC05: [32-bit] Player's Cash
@@ -318,6 +324,9 @@ function PlayersLastActualBetAmount() => word(0x00CC2F)
 //        (Excluding cash put into current casino game)
 function PlayersCurrentMissionCashTotal() => dword(0x00CC33)
 
+// $CC41: [8-bit] Player's Score Card Total (Draw Poker Credits AKA Draw Poker Points)
+function PlayersScoreCardTotal() => byte(0x00CC41)
+
 // $CC42: [8-bit] Player's Current Mission Games Won
 //        (Temporarily Persistent - not cleared after Game Ending until number of Players is selected. Value = 1 if player won, 0 otherwise; all flags reset to 0 at start of each mission after the cutscene.)
 //        (Bit Flags)
@@ -340,6 +349,8 @@ function PlayersSplitHandResult() => byte(0x00CC69)
 function PlayersSplitHandResult_IsSpecialFlag() => bit0(0x00CC69)
 function PlayersSplitHandResult_IsActiveFlag() => bit3(0x00CC69)
 function PlayersSplitHandResult_IsWonFlag() => bit5(0x00CC69)
+function PlayersSplitHandResult_IsTiedFlag() => bit6(0x00CC69)
+function PlayersSplitHandResult_IsWonOrTiedFlag() => bit7(0x00CC69)
 
 // $CC79: [8-bit] Player's Cheat Coin 1 Quantity at Shady
 //        (Slots - Sevens AKA Gold Coin; set to 0 upon exiting Shady)
@@ -457,6 +468,18 @@ function PlayersCheatCoin2Quantity() => byte(0x00D491)
 
 // $D4D6: [16-bit] "Pass" Bet Amount
 // $D4D8: [16-bit] "Don't Pass" Bet Amount
+// $D4DA: [16-bit] "Odds Come 4" Bet Amount
+// $D4DC: [16-bit] "Odds Come 5" Bet Amount
+// $D4DE: [16-bit] "Odds Come 6" Bet Amount
+// $D4E0: [16-bit] "Odds Come 8" Bet Amount
+// $D4E2: [16-bit] "Odds Come 9" Bet Amount
+// $D4E4: [16-bit] "Odds Come 10" Bet Amount
+// $D4E6: [16-bit] "Odds Don't Come 4" Bet Amount
+// $D4E8: [16-bit] "Odds Don't Come 5" Bet Amount
+// $D4EA: [16-bit] "Odds Don't Come 6" Bet Amount
+// $D4EC: [16-bit] "Odds Don't Come 8" Bet Amount
+// $D4EE: [16-bit] "Odds Don't Come 9" Bet Amount
+// $D4F0: [16-bit] "Odds Don't Come 10" Bet Amount
 // $D4F2: [16-bit] "Come" Bet Amount
 // $D4F4: [16-bit] "Don't Come" Bet Amount
 // $D4F6: [16-bit] "Lay 4" Bet Amount
@@ -499,6 +522,18 @@ function PassBetAmount() => word(0x00D4D6)
 function DontPassBetAmount() => word(0x00D4D8)
 function ComeBetAmount() => word(0x00D4F2)
 function DontComeBetAmount() => word(0x00D4F4)
+function OddsCome4BetAmount() => word(0x00D4DA)
+function OddsCome5BetAmount() => word(0x00D4DC)
+function OddsCome6BetAmount() => word(0x00D4DE)
+function OddsCome8BetAmount() => word(0x00D4E0)
+function OddsCome9BetAmount() => word(0x00D4E2)
+function OddsCome10BetAmount() => word(0x00D4E4)
+function OddsDontCome4BetAmount() => word(0x00D4E6)
+function OddsDontCome5BetAmount() => word(0x00D4E8)
+function OddsDontCome6BetAmount() => word(0x00D4EA)
+function OddsDontCome8BetAmount() => word(0x00D4EC)
+function OddsDontCome9BetAmount() => word(0x00D4EE)
+function OddsDontCome10BetAmount() => word(0x00D4F0)
 function Lay4BetAmount() => word(0x00D4F6)
 function Lay5BetAmount() => word(0x00D4F8)
 function Lay6BetAmount() => word(0x00D4FA)
@@ -549,9 +584,66 @@ function PlayersActualBetAmountBCD() => word_be(0x00D64A)
 //        01 = player has control of craps table
 function IsCrapsPlayersTurn() => byte(0x00D659)
 
+// $FFB7: [8-bit] Is Casino Game Active?
+//        00 = no (initial value; set when Competitive Mode casino game ends; also set at title screen)
+//        01 = yes (set when Practice or Competitive Mode casino game starts; also set during game ending)
+function IsCasinoGameActive() => byte(0x00FFB7)
+
+// $FFCC: [8-bit] Current Bet Type
+//        (Craps - bet currently highlighted by player or being evaluated)
+//        00/01 = Pass/Don't Pass
+//        02-07 = Odds Come 4/5/6/8/9/10
+//        08-0d = Odds Don't Come 4/5/6/8/9/10
+//        0e/0f = Come/Don't Come
+//        10-15 = Lay 4/5/6/8/9/10
+//        16 = Seven
+//        17-1c = Buy 4/5/6/8/9/10
+//        1d/1e = Hard 4/10
+//        1f-24 = Place 4/5/6/8/9/10
+//        25/26 = Hard 6/8
+//        27 = Craps 2
+//        28 = Horn
+//        29 = Craps 12
+//        2a = Big 6
+//        2b = Field
+//        2c = Craps 3
+//        2d = Yoleven
+//        2e = Big 8
+//        2f = Any Craps
+//        30 = C and E
+//        88 = (none being evaluated - during dice roll/bet evaluation)
+//        ff = (none highlighted - during player's turn)
+//        (Note: "Come" and "Don't Come" are evaluated even when those bets are not in play, and are always evaluated first. I suspect the reason
+//        is related to them being the only bets that cause a different bet ("Odds Come" or "Odds Don't Come") to be added during bet evaluation,
+//        even though those added bets won't be active until the next roll.)
+function CrapsBetType() => byte(0x00FFCC)
+CrapsBetTypeDict = {"Pass": 0x00, "DontPass": 0x01, "OddsCome4": 0x02, "OddsCome5": 0x03, "OddsCome6": 0x04, "OddsCome8": 0x05, "OddsCome9": 0x06, "OddsCome10": 0x07,
+    "OddsDontCome4": 0x08, "OddsDontCome5": 0x09, "OddsDontCome6": 0x0a, "OddsDontCome8": 0x0b, "OddsDontCome9": 0x0c, "OddsDontCome10": 0x0d, "Come": 0x0e,
+    "DontCome": 0x0f, "Lay4": 0x10, "Lay5": 0x11, "Lay6": 0x12, "Lay8": 0x13, "Lay9": 0x14, "Lay10": 0x15, "Seven": 0x16, "Buy4": 0x17, "Buy5": 0x18, 
+    "Buy6": 0x19, "Buy8": 0x1a, "Buy9": 0x1b, "Buy10": 0x1c, "Hard4": 0x1d, "Hard10": 0x1e, "Place4": 0x1f, "Place5": 0x20, "Place6": 0x21, "Place8": 0x22,
+    "Place9": 0x23, "Place10": 0x24, "Hard6": 0x25, "Hard8": 0x26, "Craps2": 0x27, "Horn": 0x28, "Craps12": 0x29, "Big6": 0x2a, "Field": 0x2b, "Craps3": 0x2c,
+    "Yoleven": 0x2d, "Big8": 0x2e, "AnyCraps": 0x2f, "CAndE": 0x30}
+
 // $FFC9: [8-bit] Established Point Number
 //        (Craps)
 function EstablishedPointNumber() => byte(0x00FFC9)
+
+// $FFCE: [8-bit] Spin/Roll Outcome Flags
+//        (Slots - Bit Flags; bits 2-7 set when reels stop, but not otherwise cleared)
+//        Bit0 = Competitive Mode
+//        Bit1 = Practice Mode spin in progress (set when reels start, cleared when reels stop)
+//        Bit2 = Player line 1 won
+//        Bit3 = Player line 2 won
+//        Bit4 = Player line 3 won
+//        Bit5 = Opponent line 1 won
+//        Bit6 = Opponent line 2 won
+//        Bit7 = Opponent line 3 won
+//        
+//        (Craps - Bit Flags)
+//        Bit1 = always 1 during game?
+//        Bit2 = always 1 after first roll starts?
+//        Bit3 = current bet result being evaluated was won
+function IsCrapsBetWon() => bit3(0x00FFCE)
 
 // $FFCF: [8-bit] Jackpot/Cheat Flags
 //        (Slots - Bit Flags)
@@ -654,14 +746,32 @@ function StartedCasinoGameThisFrame(casino_game_name) {
     if (casino_game_name == "Blackjack")
         return Changed(CurrentCasinoGame()) && IsPlayingBlackjack()
     else if (casino_game_name == "Slots")
-      return Changed(CurrentCasinoGame()) && IsPlayingSlots()
+        return Changed(CurrentCasinoGame()) && IsPlayingSlots()
     else if (casino_game_name == "Video Poker")
-       return Changed(CurrentCasinoGame()) && IsPlayingVideoPoker()
+        return Changed(CurrentCasinoGame()) && IsPlayingVideoPoker()
     else if (casino_game_name == "Draw Poker")
         return Changed(CurrentCasinoGame()) && IsPlayingDrawPoker()
     else if (casino_game_name == "Craps")
         return Changed(CurrentCasinoGame()) && IsPlayingCraps()        
 }
+
+// Competitive Mode only - currently unused
+//function EndedCasinoGameThisFrame(casino_game_name) {
+//    if (casino_game_name == "Blackjack")
+//        PrevScreen = GameStateDict("BlackjackOrDrawPoker")
+//    else if (casino_game_name == "Slots")
+//        PrevScreen = GameStateDict("CompetitiveSlots")
+//    else if (casino_game_name == "Video Poker")
+//        PrevScreen = GameStateDict("VideoPoker")
+//    else if (casino_game_name == "Draw Poker")
+//        PrevScreen = GameStateDict("BlackjackOrDrawPoker")
+//
+//    CurScreen = __ornext(IsAtScreen("CashPrize") || IsAtScreen("ScoreCard"))    
+//    return prev(GameState()) == PrevScreen && GameState() == CurScreen
+//}
+
+// Competitive Mode only - Practice casino games do not clear this value at the end
+function EndedCasinoGameThisFrame() => Decreased(IsCasinoGameActive())
 
 function StartedMissionThisFrame() {
     // The Gangster Portrait screen seems to be the most consistent and easily identifiable way to determine a mission has started
@@ -684,9 +794,7 @@ function WonMissionThisFrame() {
 
 function WonCompetitiveModeThisFrame() {
     FinalMissionNum = 5
-
-    return DisplayedMissionNumber() == FinalMissionNum &&
-           WonMissionThisFrame()
+    return IsCompetitiveMode() && DisplayedMissionNumber() == FinalMissionNum && WonMissionThisFrame()
 }
 
 //function CasinoGameEnded(casino_game_name) {
@@ -776,7 +884,7 @@ MaxCheatsPerMission = 48
 //                             Helper Functions (Casino Game-Specific)
 // ************************************************************************************************
 
-function BlackjackPlayer_WonMainHand() => PlayersHandResult_IsActiveFlag() == 1 && PlayersHandResult_IsWonFlag() == 1
+function BlackjackPlayer_WonMainHand() => PlayersHandResult_IsWonFlag() == 1 // && PlayersHandResult_IsActiveFlag() == 1 
 function BlackjackPlayer_WonSplitHand() => PlayersSplitHandResult_IsActiveFlag() == 1 && PlayersSplitHandResult_IsWonFlag() == 1
 function BlackjackPlayer_WonMainHandWithBlackjack() => BlackjackPlayer_WonMainHand() && PlayersHandResult_IsSpecialFlag() == 1
 function BlackjackPlayer_WonSplitHandWithBlackjack() => BlackjackPlayer_WonSplitHand() && PlayersSplitHandResult_IsSpecialFlag() == 1
@@ -784,10 +892,9 @@ function BlackjackPlayer_WonMainHandWithBlackjackThisFrame() => Changed(PlayersH
 function BlackjackPlayer_WonSplitHandWithBlackjackThisFrame() => Changed(PlayersSplitHandResult()) && BlackjackPlayer_WonSplitHandWithBlackjack()
 function BlackjackPlayer_WonEitherWithBlackjackThisFrame() => BlackjackPlayer_WonMainHandWithBlackjackThisFrame() ||  BlackjackPlayer_WonSplitHandWithBlackjackThisFrame()
 
-function BlackjackPlayer_WonEitherHandThisFrame() {
-    return (Changed(PlayersHandResult()) && BlackjackPlayer_WonMainHand()) ||
-           (Changed(PlayersSplitHandResult()) && BlackjackPlayer_WonSplitHand())
-}
+function BlackjackPlayer_WonMainHandThisFrame() => Changed(PlayersHandResult()) && BlackjackPlayer_WonMainHand()
+function BlackjackPlayer_WonSplitHandThisFrame() => Changed(PlayersSplitHandResult()) && BlackjackPlayer_WonSplitHand()
+function BlackjackPlayer_WonEitherHandThisFrame() => BlackjackPlayer_WonMainHandThisFrame() || BlackjackPlayer_WonSplitHandThisFrame()
 
 function BlackjackPlayer_WonBothSplitHandsThisFrame() {
     return PlayersHandResult_IsSplitFlag() == 1  && Changed(PlayersSplitHandResult()) && 
@@ -856,6 +963,63 @@ function BlackjackPlayer_OnceSawNextCardWouldBust(max_hand_value) {
 function BlackjackPlayer_SawDealerHandHigherThisFrame() {
     return BlackjackPlayer_UsedSeeDealDownCheatThisFrame() &&
         DealersHandPointValue() > ActiveHandPointValue()
+}
+
+function BlackjackDealer_HasBlackjack() => DealersHandCardCount() == 2 && DealersHandPointValue() == 21
+function BlackjackDealer_HasBlackjackThisFrame() => BlackjackDealer_HasBlackjack() && Changed(DealersHandCardCount())
+
+function BlackjackPlayer_MainHandPush21ThisFrame() {
+    return Changed(PlayersHandResult_IsTiedFlag()) && PlayersHandResult_IsTiedFlag() == 1 && DealersHandPointValue() == 21       
+}
+
+function BlackjackPlayer_SplitHandPush21ThisFrame() {
+    return Changed(PlayersSplitHandResult_IsTiedFlag()) && PlayersSplitHandResult_IsTiedFlag() == 1 && DealersHandPointValue() == 21 &&
+         PlayersSplitHandResult_IsActiveFlag() == 1 
+}
+
+function BlackjackPlayer_SplitThisFrame() => PlayersHandResult_IsSplitFlag() == 1 && Changed(PlayersHandResult_IsSplitFlag())
+
+//function BlackjackPlayer_MainHandAvoidableLoss() {
+//    // Returns true if either of the following are true:
+//    // 1. Player's main hand lost and dealer doesn't have B.J.
+//    // 2. Player's main hand pushed and dealer doesn't have 21
+//    return Changed(PlayersHandResult()) && // PlayersHandResult_IsActiveFlag() == 1 &&
+//        ((PlayersHandResult_IsWonOrTiedFlag() == 0 && !BlackjackDealer_HasBlackjack()) ||
+//         (PlayersHandResult_IsTiedFlag() == 1 && DealersHandPointValue() != 21))
+//}
+
+//function BlackjackPlayer_SplitHandAvoidableLoss() {
+//    // Returns true if either of the following are true:
+//    // 1. Player's split hand lost and dealer doesn't have B.J.
+//   // 2. Player's split hand pushed and dealer doesn't have 21
+//    return Changed(PlayersSplitHandResult()) && PlayersSplitHandResult_IsActiveFlag() == 1 &&
+//        ((PlayersSplitHandResult_IsWonOrTiedFlag() == 0 && !BlackjackDealer_HasBlackjack()) ||
+//         (PlayersSplitHandResult_IsTiedFlag() == 1 && DealersHandPointValue() != 21))
+//}
+
+function BlackjackPlayer_MainHandAvoidableLoss() {
+    // Player's main hand lost and dealer doesn't have B.J.
+    return HandNumber() != 0 && Changed(PlayersHandResult()) &&
+        PlayersHandResult_IsWonOrTiedFlag() == 0 && !BlackjackDealer_HasBlackjack()
+}
+
+
+function BlackjackPlayer_MainHandAvoidablePush() {
+    // Player's main hand pushed and dealer doesn't have 21
+    return HandNumber() != 0 && Changed(PlayersHandResult()) &&
+         PlayersHandResult_IsTiedFlag() == 1 && DealersHandPointValue() != 21
+}
+
+function BlackjackPlayer_SplitHandAvoidableLoss() {
+    // Player's split hand lost and dealer doesn't have B.J.
+    return HandNumber() != 0 && Changed(PlayersSplitHandResult()) && PlayersSplitHandResult_IsActiveFlag() == 1 && prev(PlayersSplitHandResult_IsActiveFlag()) == 1 &&
+        PlayersSplitHandResult_IsWonOrTiedFlag() == 0 && !BlackjackDealer_HasBlackjack()
+}
+
+function BlackjackPlayer_SplitHandAvoidablePush() {
+    // Player's split hand pushed and dealer doesn't have 21
+    return HandNumber() != 0 && Changed(PlayersSplitHandResult()) && PlayersSplitHandResult_IsActiveFlag() == 1 && prev(PlayersSplitHandResult_IsActiveFlag()) == 1 &&
+         PlayersSplitHandResult_IsTiedFlag() == 1 && DealersHandPointValue() != 21
 }
 
 // Don't count it as "spin ending" when the spin counter is being initialized from 0 to 1 before the first spin
@@ -1002,8 +1166,8 @@ function DrawPokerOpponent_RaisedBetThisFrame() {
     // When opponent raises on their turn: First, the "Last Placed Bet Amount" is zeroed out before the bet is made. Upon making the bet, "Last Placed Bet Amount" and
     // "Opponent's Last Actual Bet Amount" are set to the bet amount. If the opponent calls instead, "Last Placed Bet Amount" will remain zero, but the
     // "Opponent's Last Actual Bet Amount" will be set to the called bet amount.
-    // TODO: fix false trigger when opponent only bet (not raised) then player won hand (b/c "Player's Last Actual Bet Amount" is not cleared from previous hand)
-    // need to check that player already had a turn this hand?
+    // TODO: Fix to handle case where player bet in 1st draw, then opponent bets first in 2nd draw (which wouldn't be a raise but "Player's Last Actual Bet Amount" is
+    // still >0)
     return IsOpponentsTurn() == 1 && PlayersLastActualBetAmount() > 0 &&
            LastPlacedBetAmount() > 0 && LastPlacedBetAmount() == OpponentsLastActualBetAmount() && Changed(LastPlacedBetAmount())
 }
@@ -1036,10 +1200,28 @@ function CrapsRoll_IsCraps() => CombinedDiceRoll() == 2 || CombinedDiceRoll() ==
 function CrapsRoll_IsPoint() => CombinedDiceRoll() == EstablishedPointNumber()
 
 //function IsShowingBetResults() => ShowingBetResults() == ShowingBetResultsDict["Yes"]
-function CrapsPlayer_ControlPaused() => IsCrapsPlayersTurn() == 0
+//function Craps_IsPlayerTurn() => IsCrapsPlayersTurn() == 1
+function CrapsPlayer_TurnPaused() => IsCrapsPlayersTurn() == 0
+function CrapsPlayer_TurnEnded() => Decreased(IsCrapsPlayersTurn())
+function CrapsPlayer_TurnStarted() => Increased(IsCrapsPlayersTurn())
 
-// TODO: add "Come Odds" and "Don't Come Odds" bets?
-LineBetAmounts = [PassBetAmount(), DontPassBetAmount(), ComeBetAmount(), DontComeBetAmount(), PassOddsBetAmount(), DontPassOddsBetAmount()]
+LineBetTypes = ["Pass", "DontPass", "Come", "DontCome", "PassOdds", "DontPassOdds",
+                  "OddsCome4", "OddsCome5", "OddsCome6", "OddsCome8", "OddsCome9", "OddsCome10",
+                  "OddsDontCome4", "OddsDontCome5", "OddsDontCome6", "OddsDontCome8", "OddsDontCome9", "OddsDontCome10"]
+SingleBetTypes = ["Craps2", "Craps3", "Craps12", "Seven", "Yoleven", "AnyCraps",
+                    "CAndE", "Horn", "Field"]
+MultiBetTypes = ["Place4", "Place5", "Place6", "Place8", "Place9", "Place10",
+                   "Buy4", "Buy5", "Buy6", "Buy8", "Buy9", "Buy10",
+                   "Lay4", "Lay5", "Lay6", "Lay8", "Lay9", "Lay10",
+                   "Hard4", "Hard6", "Hard8", "Hard10", "Big6", "Big8"]
+AllBetTypes = []
+for bet_type in LineBetTypes {array_push(AllBetTypes, bet_type)}
+for bet_type in SingleBetTypes {array_push(AllBetTypes, bet_type)}
+for bet_type in MultiBetTypes {array_push(AllBetTypes, bet_type)}
+
+LineBetAmounts = [PassBetAmount(), DontPassBetAmount(), ComeBetAmount(), DontComeBetAmount(), PassOddsBetAmount(), DontPassOddsBetAmount(),
+                  OddsCome4BetAmount(), OddsCome5BetAmount(), OddsCome6BetAmount(), OddsCome8BetAmount(), OddsCome9BetAmount(), OddsCome10BetAmount(),
+                  OddsDontCome4BetAmount(), OddsDontCome5BetAmount(), OddsDontCome6BetAmount(), OddsDontCome8BetAmount(), OddsDontCome9BetAmount(), OddsDontCome10BetAmount()]
 SingleBetAmounts = [Craps2BetAmount(), Craps3BetAmount(), Craps12BetAmount(), SevenBetAmount(), YolevenBetAmount(), AnyCrapsBetAmount(),
                     CAndEBetAmount(), HornBetAmount(), FieldBetAmount()]
 MultiBetAmounts = [Place4BetAmount(), Place5BetAmount(), Place6BetAmount(), Place8BetAmount(), Place9BetAmount(), Place10BetAmount(),
@@ -1051,42 +1233,73 @@ for bet_amount in LineBetAmounts {array_push(AllBetAmounts, bet_amount)}
 for bet_amount in SingleBetAmounts {array_push(AllBetAmounts, bet_amount)}
 for bet_amount in MultiBetAmounts {array_push(AllBetAmounts, bet_amount)}
 
-function Craps_BetResolvedThisFrame(bet_amount) {
-    // TODO: "Any Craps" bet is not zeroed out/removed from table when won (game bug?)
-    return CrapsPlayer_ControlPaused() && ZeroedOut(bet_amount)
+//function Craps_BetResolvedThisFrame(bet_amount) {
+//    // TODO: "Any Craps" bet is not zeroed out/removed from table when won (game bug?)
+//    return CrapsPlayer_TurnPaused() && ZeroedOut(bet_amount)
+//}
+
+//function CrapsPlayer_WonBetThisFrame(bet_amount) {
+//    // When a bet is won, the associated bet amount is zeroed out on the same frame the player's cash is increased (to refund the bet amount)
+//    return Increased(PlayersCashBCD()) && Craps_BetResolvedThisFrame(bet_amount)
+//}
+
+function CrapsPlayer_WonBetThisFrame(bet_type) {
+    // When a bet is won, the associated bet amount is zeroed out on the same frame the player's cash is increased (to refund the bet amount)
+    return CrapsPlayer_TurnPaused() && Changed(CrapsBetType()) && IsCrapsBetWon() == 1
 }
 
-function CrapsPlayer_WonBetThisFrame(bet_amount) {
-    // When a bet is won, the associated bet amount is zeroed out on the same frame the player's cash is increased (to refund the bet amount)
-    return Increased(PlayersCashBCD()) && Craps_BetResolvedThisFrame(bet_amount)
+function CrapsPlayer_WonLineBets(bet_count) {
+//    return tally_of(SingleBetAmounts, bet_count, bet_amount => once(CrapsPlayer_WonBetThisFrame(bet_amount)))
+    return tally_of(LineBetTypes, bet_count, bet_type => once(CrapsPlayer_WonBetThisFrame(bet_type)))
 }
 
 function CrapsPlayer_WonSingleRollBets(bet_count) {
-    return tally_of(SingleBetAmounts, bet_count, bet_amount => once(CrapsPlayer_WonBetThisFrame(bet_amount)))
+//    return tally_of(SingleBetAmounts, bet_count, bet_amount => once(CrapsPlayer_WonBetThisFrame(bet_amount)))
+    return tally_of(SingleBetTypes, bet_count, bet_type => once(CrapsPlayer_WonBetThisFrame(bet_type)))
 }
 
 function CrapsPlayer_WonMultiRollBets(bet_count) {
-    return tally_of(MultiBetAmounts, bet_count, bet_amount => once(CrapsPlayer_WonBetThisFrame(bet_amount)))
+//    return tally_of(MultiBetAmounts, bet_count, bet_amount => once(CrapsPlayer_WonBetThisFrame(bet_amount)))
+    return tally_of(MultiBetTypes, bet_count, bet_type => once(CrapsPlayer_WonBetThisFrame(bet_type)))
 }
 
-function CrapsPlayer_WonAnyLineBetThisFrame() {
-    return any_of(LineBetAmounts, bet_amount => CrapsPlayer_WonBetThisFrame(bet_amount))
+function CrapsPlayer_WonAnyBets(bet_count) {
+//    return tally_of(AllBetAmounts, bet_count, bet_amount => once(CrapsPlayer_WonBetThisFrame(bet_amount)))
+    return tally_of(AllBetTypes, bet_count, bet_type => once(CrapsPlayer_WonBetThisFrame(bet_type)))
 }
 
-function CrapsPlayer_WonAnySingleRollBetThisFrame() {
-    return any_of(SingleBetAmounts, bet_amount => CrapsPlayer_WonBetThisFrame(bet_amount))
+//function CrapsPlayer_WonAnyLineBetThisFrame() {
+//    return any_of(LineBetAmounts, bet_amount => CrapsPlayer_WonBetThisFrame(bet_amount))
+//}
+
+//function CrapsPlayer_WonAnySingleRollBetThisFrame() {
+//    return any_of(SingleBetAmounts, bet_amount => CrapsPlayer_WonBetThisFrame(bet_amount))
+//    return any_of(SingleBetTypes, bet_type => CrapsPlayer_WonBetThisFrame(bet_type))
+//}
+
+//function CrapsPlayer_WonAnyMultiRollBetThisFrame() {
+//    return any_of(MultiBetAmounts, bet_amount => CrapsPlayer_WonBetThisFrame(bet_amount))
+//    return any_of(MultiBetTypes, bet_type => CrapsPlayer_WonBetThisFrame(bet_type))
+//}
+
+function CrapsPlayer_PlacedBet(bet_amount) {
+    // When a bet is won, the associated bet amount is zeroed out on the same frame the player's cash is increased (to refund the bet amount)
+    // Note: Ideally we could move CrapsPlayer_TurnEnded() outside the tally so it isn't duplicated for each bet type, but that doesn't seem
+    // possible with RAScript (replacing tally_of() with tally(any_of()) didn't work either, because while it would generate an OrNext chain, it
+    // only checks if ANY bet is >0 X times, rather than if X bets are >0). I think this might be a case where ResetNextIf would help.
+    return CrapsPlayer_TurnEnded() && bet_amount > 0
 }
 
-function CrapsPlayer_WonAnyMultiRollBetThisFrame() {
-    return any_of(MultiBetAmounts, bet_amount => CrapsPlayer_WonBetThisFrame(bet_amount))
+function CrapsPlayer_PlacedBets(bet_count) {
+    return tally_of(AllBetAmounts, bet_count, bet_amount => once(CrapsPlayer_PlacedBet(bet_amount)))
+//    return once(Craps_IsEndOfPlayerTurn() && tally_of(AllBetAmounts, bet_count, bet_amount => bet_amount > 0))
 }
 
-// Second attempt
-function CrapsPlayer_LostAnyBetThisFrame() {
-    LostThisFrame = Unchanged(PlayersCashBCD())
-    return tally_of(AllBetAmounts, 1, bet_amount => CrapsPlayer_ControlPaused() && LostThisFrame && ZeroedOut(bet_amount))
-//    return any_of(AllBetAmounts, betamount => CrapsBet_IsEvaluation() && LostThisFrame && ZeroedOut(betamount))
-}
+//function CrapsPlayer_LostAnyBetThisFrame() {
+//    LostThisFrame = Unchanged(PlayersCashBCD())
+//    return tally_of(AllBetAmounts, 1, bet_amount => CrapsPlayer_ControlPaused() && LostThisFrame && ZeroedOut(bet_amount))
+//    // return any_of(AllBetAmounts, betamount => CrapsBet_IsEvaluation() && LostThisFrame && ZeroedOut(betamount))
+//}
 
 //function PokerPlayer_AtLeastTwoCardsWereHeld() {
 //    // Check if two cards were "unheld" on same frame (because player can only "unhold" one card at a time by clicking)
@@ -1151,39 +1364,35 @@ function CrapsPlayer_LostAnyBetThisFrame() {
 // Tutorial (Practice Mode) Achievements
 // ----------------------------------------------
 
-achievement("Blackjack Basics - Name of the Game", "[Practice/Blackjack] Score a Blackjack (two-card 21 - increases payout by half)", 1,
+achievement("Blackjack Academy - Name of the Game", "[Practice] Blackjack - Score a Blackjack (two-card 21: payout increased by half)", 1,
     IsPracticeMode() && IsPlayingBlackjack() && BlackjackPlayer_WonEitherWithBlackjackThisFrame()
 )
 
-achievement("Blackjack Basics - Double Trouble", "[Practice/Blackjack] Double down and win the hand (bet doubled, dealt exactly one more card)", 1,
+achievement("Blackjack Academy - Double Trouble", "[Practice] Blackjack - Double down and win the hand (bet doubled and dealt exactly one more card)", 1,
     IsPracticeMode() && IsPlayingBlackjack() && BlackjackPlayer_DoubledDownAndWonThisFrame()
 )
 
-achievement("Blackjack Basics - Psychic Training", "[Practice/Blackjack] Buy or refuse insurance and have it pay off (dealer has face-up ace - costs half your bet, refunds original bet if dealer has B.J.)", 2,
+achievement("Blackjack Academy - Psychic Training",
+    "Blackjack - Buy or refuse insurance and have it pay off (dealer face-up ace: costs half your bet, original bet refunded if dealer has B.J.)", 2,
     IsPracticeMode() && IsPlayingBlackjack() &&
     ((BlackjackPlayer_BoughtInsurance() && DealersHandPointValue() == 21) || (BlackjackPlayer_DeclinedInsurance() && DealersHandPointValue() != 21))
 )
 
-achievement("Blackjack Basics - Make Like a Banana and...", "[Practice/Blackjack] Split and win both hands (two same-value cards - play them as separate hands, each with original bet)", 2,
+achievement("Blackjack Academy - Make Like a Banana", "Blackjack - Split and win both hands (two same-value cards: play them as separate hands, each with original bet)", 2,
     IsPracticeMode() && IsPlayingBlackjack() && BlackjackPlayer_WonBothSplitHandsThisFrame()
 )
 
-achievement("Slots Basics - Cherry Picking", "[Practice/Slots] Win any line with 1 Cherry (2x payout) or 2 Cherry (5x)", 1,
-    IsPracticeMode() && IsPlayingSlots() && SlotsPlayer_PayoutThisFrame() && // SlotsPlayer_PracticeSpinEndedThisFrame() &&
-    __ornext(SlotsPlayer_WonAnyLineWith("1Cherry") || SlotsPlayer_WonAnyLineWith("2Cherry")) 
+//achievement("Slots Academy - Cherry Picking", "[Practice] Slots - Win any line with 1 Cherry (2x payout) or 2 Cherry (5x)", 1,
+//    IsPracticeMode() && IsPlayingSlots() && SlotsPlayer_PayoutThisFrame() && 
+//    __ornext(SlotsPlayer_WonAnyLineWith("1Cherry") || SlotsPlayer_WonAnyLineWith("2Cherry")) 
+//)
+
+achievement("Slots Academy - One-Armed Banditry", "[Practice] Slots - Bet on all three lines and win at least two of them on the same spin", 1,
+    IsPracticeMode() && IsPlayingSlots() && SlotsPlayer_WonAtLeast2LinesThisFrame() && SlotsPlayersBetMultiplier() == 3
 )
 
-achievement("Slots Basics - One-Armed Banditry", "[Practice/Slots] Bet on all three lines and win at least two of them on the same spin", 1,
-    IsPracticeMode() && IsPlayingSlots() && // SlotsPlayer_PracticeSpinEndedThisFrame() &&
-    // Use Delta value because the bet multiplier is zeroed out on the frame that the "spin ends"
-    SlotsPlayer_WonAtLeast2LinesThisFrame() &&
-    // This check might be redundant if the payout bet multiplier is only set if the winning line is active
-    SlotsPlayersBetMultiplier() == 3
-    // Use Delta value because the bet multiplier is zeroed out on the frame that the "spin ends"
-//    prev(SlotsPlayersBetMultiplier()) == 3     
-)
-
-achievement("Video Poker Basics - Can You Hold, Please?", "[Practice/Video Poker] Press the (H)old button underneath at least one card and have a higher-scoring hand on the second draw", 1,
+achievement("Video Poker Academy - Can You Hold, Please?",
+    "[Practice] Video Poker - Press the (H)old button under at least one card and have a higher-scoring hand on the second draw (one pair must be Jacks or better to score)", 1,
     // Note: This does not track whether the hold button remained pressed, only that it was pressed at some point. Doing the former would be difficult 
     // because the 2nd draw resets all 5 "Card X Held" addresses to the same value (0x03) as if the hold were deselected by the player, and there doesn't
     // seem to be a good way to detect when the Draw button was pressed, either.
@@ -1196,47 +1405,10 @@ achievement("Video Poker Basics - Can You Hold, Please?", "[Practice/Video Poker
 //    PokerPlayer_AtLeastOneCardValueChanged())  // this is redundant because we checked that hand scoring increased - no?
 )
 
-achievement("Video Poker Basics - Paired Up", "[Practice/Video Poker] Win hand with one pair of \"Jacks or better\" (1x payout) or two pair (2x)", 1,
-    IsPracticeMode() && IsPlayingVideoPoker() && PlayerWonHand_ThisFrame() &&
-    __ornext(PokerPlayer_WonWith("OnePair") || PokerPlayer_WonWith("TwoPair"))
-)
-
-
-achievement("Craps Basics - It's Only Natural", "[Practice/Craps] Win a \"Pass\" line bet by rolling a \"natural\" (7 or 11) on the come-out roll", 1,
-    IsPlayingCraps() && CrapsRoll_IsNatural() && CrapsPlayer_WonBetThisFrame(PassBetAmount())
-)
-
-achievement("Craps Basics - Got the Craps", "[Practice/Craps] Win a \"Don't Pass\" line bet by rolling \"craps\" (2 or 3 to win, 12 to push) on the come-out roll", 1,
-    IsPlayingCraps() && CrapsRoll_IsCraps() && CrapsPlayer_WonBetThisFrame(DontPassBetAmount())
-)
-
-achievement("Craps Basics - Hold the Line", "Establish a \"point number\" (4-6 or 8-10) on the come-out roll, then win a \"Come\" line bet by rolling 7 or 11", 1,
-    IsPlayingCraps() && CrapsRoll_IsNatural() && CrapsPlayer_WonBetThisFrame(ComeBetAmount())
-)
-
-achievement("Craps Basics - Mama Told Me Not To", "Establish a \"point number\" (4-6 or 8-10) on the come-out roll, then win a \"Don't Come\" line bet by rolling 2 or 3 (12 to push)", 1,
-    IsPlayingCraps() && CrapsRoll_IsCraps() && CrapsPlayer_WonBetThisFrame(DontComeBetAmount())
-)
-
-achievement("Craps Basics - OK, OK, I Get the Point", "Establish a \"point number\" (4-6 or 8-10) on the come-out roll, then win a \"Pass\" or \"Pass Odds\" line bet by rolling the point number", 1,
-    IsPlayingCraps() && CrapsRoll_IsPoint() && (CrapsPlayer_WonBetThisFrame(PassBetAmount()) || CrapsPlayer_WonBetThisFrame(PassOddsBetAmount()))
-)
-
-achievement("Craps Basics - What's in the Box?", "Establish a \"point number\" (4-6 or 8-10) on the come-out roll, then win a \"Don't Pass\" or \"Don't Pass Odds\" line bet by \"sevening out\" (roll a 7)", 1,
-    IsPlayingCraps() && CombinedDiceRoll() == 7 && (CrapsPlayer_WonBetThisFrame(DontPassBetAmount()) || CrapsPlayer_WonBetThisFrame(DontPassOddsBetAmount()))
-)
-
-achievement("Craps Basics - Crapshoot", "Win at least 3 different single-roll bets (Craps #, Seven, Yoleven, Any Craps, C & E, Horn, Field)", 2,
-    IsPlayingCraps() && CrapsPlayer_WonSingleRollBets(3) && // internally uses tally w/ hit counts to track bets won
-    // Reset count if player exits craps
-    never(!IsPlayingCraps())
-)
-
-achievement("Craps Basics - Rollin', Rollin', Rollin'", "[Practice/Craps] Win at least 3 different multi-roll bets (Place #, Buy #, Lay #, Hard #, Big #)", 2,
-    IsPlayingCraps() && CrapsPlayer_WonMultiRollBets(3) && // internally uses tally w/ hit counts to track bets won
-    // Reset count if player exits craps
-    never(!IsPlayingCraps())
-)
+//achievement("Video Poker Academy - Paired Up", "[Practice] Video Poker - Win hand with one pair of \"Jacks or better\" (1x payout) or two pair (2x)", 1,
+//    IsPracticeMode() && IsPlayingVideoPoker() && PlayerWonHand_ThisFrame() &&
+//    __ornext(PokerPlayer_WonWith("OnePair") || PokerPlayer_WonWith("TwoPair"))
+//)
 
 // ----------------------------------------------
 // Progression Achievements
@@ -1246,10 +1418,10 @@ achievement("Craps Basics - Rollin', Rollin', Rollin'", "[Practice/Craps] Win at
 function WinStageAchievement(mission, casino_game_num, ach_title, ach_points)
 {
     CasinoGameName = GetCasinoGameName(casino_game_num)
-    if (casino_game_num == 4)
-        ach_desc = format("[Competitive/Mission {0}] Defeat {2} (win at {1})", mission, CasinoGameName, GetGangsterName(mission))
-    else
-        ach_desc = format("[Competitive/Mission {0}] Win at {1} vs. {2}", mission, CasinoGameName, GetGangsterName(mission))
+//    if (casino_game_num == 4)
+//        ach_desc = format("Mission {0}-{1}: Defeat {3} (win at {2})", mission, casino_game_num, CasinoGameName, GetGangsterName(mission))
+//    else
+    ach_desc = format("Mission {0}-{1}: Win at {2} vs. {3}", mission, casino_game_num, CasinoGameName, GetGangsterName(mission))
 
     achievement(ach_title, ach_desc, ach_points,
         DisplayedMissionNumber() == mission && PlayerWonCasinoGameThisFrame(CasinoGameName)
@@ -1258,8 +1430,8 @@ function WinStageAchievement(mission, casino_game_num, ach_title, ach_points)
 
 // Add achievements for winning each Competitive Mode mission/casino game
 // Mission 1 - Machine Gun Max
-WinStageAchievement(1, 1, "Machine Gun Max, Meet Bulletproof Bob", 2)
-WinStageAchievement(1, 2, "Just Call It Beginner's Luck", 2)
+WinStageAchievement(1, 1, "Bulletproof Bob", 2)
+WinStageAchievement(1, 2, "Beginner's Luck?", 2)
 WinStageAchievement(1, 3, "Loserus Maximus", 2)
 WinStageAchievement(1, 4, "Max Maxed Out", 5)
 // Mission 2 - Suitcase Sam
@@ -1268,22 +1440,22 @@ WinStageAchievement(2, 2, "I Do Not Lose Them, Sam-I-Am", 3)
 WinStageAchievement(2, 3, "Sam Clubbed", 3)
 WinStageAchievement(2, 4, "Unpacked Suitcase Sam", 5)
 // Mission 3 - Hitman Harry
-WinStageAchievement(3, 1, "Harry's Not So Scary", 4)
-WinStageAchievement(3, 2, "You're No Wizard, Harry", 4)
-WinStageAchievement(3, 3, "Blood Money Transfusion", 4)
+WinStageAchievement(3, 1, "Harry's Not So Scary", 3)
+WinStageAchievement(3, 2, "You're No Wizard, Harry", 3)
+WinStageAchievement(3, 3, "Blood Money Transfusion", 3)
 WinStageAchievement(3, 4, "Whacked the Hitman", 5)
 // Mission 4 - Lucky Louis
-WinStageAchievement(4, 1, "Louis the Not-So-Great", 10)
+WinStageAchievement(4, 1, "Louis the Not-So-Great", 5)
 WinStageAchievement(4, 2, "More Like Unlucky Louis, Amirite?", 5)
-WinStageAchievement(4, 3, "You're Out of Luck, I'm Out of Time", 10)
+WinStageAchievement(4, 3, "You're Out of Luck, I'm Out of Time", 5)
 WinStageAchievement(4, 4, "Louie, Louie, You Gotta Go", 10)
 // Mission 5 - Al Cologne
-WinStageAchievement(5, 1, "Cologne Bolonga", 10)
+WinStageAchievement(5, 1, "Cologne Bolonga", 5)
 WinStageAchievement(5, 2, "Say Hello to My Little Spend", 5)
-WinStageAchievement(5, 3, "Nice Try, Wiseguy", 10)
+WinStageAchievement(5, 3, "Nice Try, Wiseguy", 5)
 WinStageAchievement(5, 4, "Ding, Don Done", 10)
 
-achievement("Brought Down the Mob", "[Competitive/All Missions] Defeat all five gangsters without using a password", 25,
+achievement("Brought Down the Mob", "Beat the game without using a password", 25,
     WonCompetitiveModeThisFrame() && disable_when(UsedCompetitiveModePassword(), StartedCompetitiveModeNewGameThisFrame())
 )
 
@@ -1291,19 +1463,19 @@ achievement("Brought Down the Mob", "[Competitive/All Missions] Defeat all five 
 // Optional (Item Usage) Achievements
 // ----------------------------------------------
 
-achievement("Bustin' Don't Make Me Feel Good", "[Competitive/Blackjack] Use See Next Card (with a hand value of 17 or less) to reveal a card that would make you bust, then win the hand", 5,
+achievement("Bustin' Don't Make Me Feel Good", "Blackjack - Use See Next Card when your hand value is 17 or less, revealing a card that would make you bust, then win the hand", 5,
     // TODO: need to check if player has a "soft" hand (11 pt ace) because that would prevent bust if the player just hits
     IsCompetitiveMode() && IsPlayingBlackjack() &&
     BlackjackPlayer_OnceSawNextCardWouldBust(17) &&  // once() clauses are internal to this function due to the complexity of the logic
     BlackjackPlayer_WonEitherHandThisFrame() && never(BlackjackPlayer_StartedEitherHandThisFrame())
 )
 
-achievement("I Won't Stand For This", "[Competitive/Blackjack] Use See Deal Down (with a hand value of 12 or more) to reveal a higher-point dealer hand value, then win the hand",  5,
+achievement("I Won't Stand For This", "Blackjack - Use See Deal Down when your hand value is 12 or more, revealing a higher-point card total, then win the hand",  5,
     IsCompetitiveMode() && IsPlayingBlackjack() && once(ActiveHandPointValue() >= 12 && BlackjackPlayer_SawDealerHandHigherThisFrame()) &&
     BlackjackPlayer_WonEitherHandThisFrame() && never(BlackjackPlayer_StartedEitherHandThisFrame())
 )
 
-achievement("An Offer He Can't Refuse", "[Competitive/Blackjack] Use Swap Card to raise your opponent's hand value above 21 points", 3,
+achievement("An Offer He Can't Refuse", "Blackjack - Use Swap Card to raise your opponent's hand value above 21 points", 3,
     // Order of events:
     // * Player's Swap Card Cheat Quantity decremented (then incremented if player cancels out of it)
     // * Swap animation plays
@@ -1314,11 +1486,7 @@ achievement("An Offer He Can't Refuse", "[Competitive/Blackjack] Use Swap Card t
 //    never(BlackjackPlayer_StartedEitherHandThisFrame()) &&
 )
 
-achievement("Sus Hands Are Afoot", "[Competitive/Blackjack] Make your opponent bust with a \"very non-suspicious\" hand value of 35 points or more", 5,
-    IsCompetitiveMode() && IsPlayingBlackjack() && BlackjackOpponent_BustedThisFrame(35)
-)
-
-achievement("Limited Time Offer", "[Competitive/Slots] Purchase a bonus item (Spin 3 or 7), place it (with D-pad then A), and win the line", 3,
+achievement("Limited Time Offer", "Slots - Purchase a bonus item (Spin 3 or 7), place it (with the D-pad), and win the line", 3,
     IsCompetitiveMode() && IsPlayingSlots() &&
     // This logic is more complicated than one might expect due to the lack of a known address that specifically indicates "player purchased a bonus item".
     // Instead, we detect that the bonus item was visible on a certain slot machine/column on the previous frame, and now it is gone this frame (as well as
@@ -1332,7 +1500,7 @@ achievement("Limited Time Offer", "[Competitive/Slots] Purchase a bonus item (Sp
 //              SlotsPlayer_WonLine()
 )
 
-achievement("Tri So Serious", "[Competitive/Video Poker] Have at least 3 Jokers in your hand", 3,
+achievement("Tri So Serious", "Video Poker - Have at least 3 Joker cards in your hand in Competitive Mode", 3,
     IsCompetitiveMode() && IsPlayingVideoPoker() && PokerPlayer_Has3Jokers()
 //              never(Increased(HandNumber())) && // have to reset tally() hits after each hand
 //              never(Changed(CurrentCasinoGame())) && 
@@ -1340,9 +1508,14 @@ achievement("Tri So Serious", "[Competitive/Video Poker] Have at least 3 Jokers 
 //              PokerPlayer_HasInHand(3, "Joker") // counts number of Jokers in current hand using tally()
 )
 
-achievement("Hey, I Was Using That!", "[Competitive/Video Poker] Use Swap Card to swap back a card taken from you", 2,
+achievement("Hey, I Was Using That!", "Video Poker - Use Swap Card to swap back a card taken from you", 2,
     // TODO: check swap cards of both player and opponent - this is hard to implement!
     // and what if opponent uses Swap Hand or two Swap Cards? maybe need to "record" player's cards at start of hand/draw?
+    // idea: 
+    // - have 5 "buckets" with value = initial card value
+    // - 1st hit target (1 hit) checks when a card value changes (reset on new draw/hand)
+    // - SubSource current card value at end of draw/hand
+    // - 2nd hit target (1 hit) checks if the value is 0 (card is back)
     IsCompetitiveMode() && IsPlayingVideoPoker() && once(VideoPokerOpponent_UsedSwapCardCheatThisFrame()) && VideoPokerPlayer_UsedSwapCardCheatThisFrame()
 )
 
@@ -1350,7 +1523,7 @@ achievement("Hey, I Was Using That!", "[Competitive/Video Poker] Use Swap Card t
 // Optional (Scoring Event) Achievements
 // ----------------------------------------------
 
-achievement("Sounds Like Rain", "[Any Mode/Slots] Win all 3 lines on one spin", 5,
+achievement("Sound of Rain", "Slots - Win all 3 lines on one spin", 5,
     IsPlayingSlots() && // SlotsPlayer_SpinEndedThisFrame() &&
     SlotsPlayer_WonAll3LinesThisFrame() &&
     // This check might be redundant if the payout bet multiplier is only set if the winning line is active
@@ -1359,70 +1532,69 @@ achievement("Sounds Like Rain", "[Any Mode/Slots] Win all 3 lines on one spin", 
 //    prev(SlotsPlayersBetMultiplier()) == 3 
 )
 
-achievement("Fruit Snacks", "[Any Mode/Slots] Win any line with 3 Cherry (10x payout) or 2 Orange (12x)", 2,
-    IsPlayingSlots() && SlotsPlayer_PayoutThisFrame() && // SlotsPlayer_SpinEndedThisFrame() &&
-    __ornext(SlotsPlayer_WonAnyLineWith("3Cherry") || SlotsPlayer_WonAnyLineWith("2Orange")) 
+achievement("Cherry Picking", "Slots - Win any line with 2 Cherry (5x payout), 3 Cherry (10x), or 2 Orange (12x)", 2,
+    IsPracticeMode() && IsPlayingSlots() && SlotsPlayer_PayoutThisFrame() && 
+    __ornext(SlotsPlayer_WonAnyLineWith("2Cherry") || SlotsPlayer_WonAnyLineWith("3Cherry") || SlotsPlayer_WonAnyLineWith("2Orange")) 
 )
 
-achievement("Fruit Salad", "[Any Mode/Slots] Win any line with 3 Orange (15x payout), 3 Plum (20x), or 3 Melon (25x)", 4,
-    IsPlayingSlots() && SlotsPlayer_PayoutThisFrame() && // SlotsPlayer_SpinEndedThisFrame() &&
+//achievement("Fruit Snacks", "Slots - Win any line with 2 Orange (12x payout) or 3 Orange (15x)", 2,
+//    IsPlayingSlots() && SlotsPlayer_PayoutThisFrame() &&
+//    __ornext(SlotsPlayer_WonAnyLineWith("2Orange") || SlotsPlayer_WonAnyLineWith("3Orange")) 
+//)
+
+achievement("Fruit Salad", "Slots - Win any line with 3 Orange (15x payout), 3 Plum (20x), or 3 Melon (25x)", 4,
+    IsPlayingSlots() && SlotsPlayer_PayoutThisFrame() &&
     __ornext(SlotsPlayer_WonAnyLineWith("3Orange") || SlotsPlayer_WonAnyLineWith("3Plum") || SlotsPlayer_WonAnyLineWith("3Melon"))
 )
 
-achievement("Triple Threat", "[Any Mode/Slots] Win any line with 3 Bell (50x payout), 3 Bar (100x), or 777 (200x)", 10,
-    IsPlayingSlots() && SlotsPlayer_PayoutThisFrame() && // SlotsPlayer_SpinEndedThisFrame() &&
+achievement("Triple Threat", "Slots - Win any line with 3 Bell (50x payout), 3 Bar (100x), or non-jackpot 777 (200x)", 10,
+    IsPlayingSlots() && SlotsPlayer_PayoutThisFrame() &&
     __ornext(SlotsPlayer_WonAnyLineWith("3Bell") || SlotsPlayer_WonAnyLineWith("3Bar") || SlotsPlayer_WonAnyLineWith("777"))
 )
 
-achievement("JACKPOT!", "[Any Mode/Slots] Win the jackpot with a 3rd-line 777", 25,
+achievement("JACKPOT!", "Slots - Win the jackpot with a 3rd-line 777", 25,
     IsPlayingSlots() && SlotsPlayer_WonJackpotThisFrame() // && SlotsPlayer_JackpotPayoutThisFrame() && // SlotsPlayer_SpinEndedThisFrame()
 )
 
-achievement("It's a Crowd", "[Competitive/Draw Poker] Win hand with 3 of a Kind (4x payout in Video Poker)", 3,
-    IsPlayingDrawPoker() && PlayerWonHand_ThisFrame() && PokerPlayer_WonWith("3OfKind")
+achievement("Matchmaker", "Draw Poker - Win hand with two pair (2x VP payout) or 3 of a Kind (4x)", 2,
+    IsPlayingDrawPoker() && PlayerWonHand_ThisFrame() && 
+    __ornext(PokerPlayer_WonWith("TwoPair") || PokerPlayer_WonWith("3OfKind"))
 )
 
-achievement("Sit Up Straight & Don't Forget to Flush", "[Any Mode/Any Poker] Win hand with Straight (5x payout in Video Poker) or Flush (8x)", 4,
+achievement("Color by Numbers", "Any Poker - Win hand with Straight (5x VP payout) or Flush (8x)", 3,
     IsPlayingPoker() && PlayerWonHand_ThisFrame() &&
     __ornext(PokerPlayer_WonWith("Straight") || PokerPlayer_WonWith("Flush"))
 )
 
-achievement("Now We're Talkin'", "[Any Mode/Any Poker] Win hand with Full House (20x payout in Video Poker) or 4 of a Kind (50x)", 5,
+achievement("Now We're Talkin'", "Any Poker - Win hand with Full House (20x VP payout) or 4 of a Kind (50x)", 5,
     IsPlayingPoker() && PlayerWonHand_ThisFrame() &&
     __ornext(PokerPlayer_WonWith("FullHouse") || PokerPlayer_WonWith("4OfKind"))
 )
 
-achievement("Flushing With Style", "[Any Mode/Any Poker] Win hand with Straight Flush (100x payout) or Royal Flush (250x)", 10,
+achievement("Flushing With Style", "Any Poker - Win hand with Straight Flush (100x VP payout) or Royal Flush (250x)", 10,
     IsPlayingPoker() && PlayerWonHand_ThisFrame() &&
     __ornext(PokerPlayer_WonWith("StraightFlush") || PokerPlayer_WonWith("RoyalFlush"))
 )
 
-achievement("High Five!", "[Any Mode/Video Poker] Win the jackpot with 5 of a Kind (requires 5x bet multiplier)", 10,
+achievement("High Five!", "Video Poker - Win the jackpot with 5 of a Kind (requires 5x bet multiplier)", 10,
     IsPlayingVideoPoker() && PlayerWonHand_ThisFrame() && PokerPlayer_WonWith("5OfKind")
-)
-
-achievement("Putting It All Together", "[Practice/Craps] Win a line, multi-roll, and single-roll bet on the same roll (without any other bets on the table)", 5,
-    IsPlayingCraps() && always_false() // TODO: implement this (disabled for now)
-    // This is way too complex - generates over 1000 alt groups and slows RATools to a halt
-// && unless(CrapsPlayer_LostAnyBetThisFrame()) && never(StartedCrapsRollThisFrame()) &&
-//    CrapsPlayer_WonBetThisFrame("Any Line") && CrapsPlayer_WonBetThisFrame("Any Single") && CrapsPlayer_WonBetThisFrame("Any Multi")
 )
 
 // ----------------------------------------------
 // Optional (Misc) Achievements
 // ----------------------------------------------
 
-achievement("Mob Money, Mob Problems", "[Competitive/Draw Poker] Defeat any gangster by making him run out of cash (during Draw Poker)", 5,
+achievement("Mob Money, Mob Problems", "Draw Poker - Defeat any gangster by making him run out of cash", 5,
     // Note: If the gangster both runs out of cash AND draw poker credits at the same time, the game treats it as running out of cash, 
     // so it is unnecessary to also check the draw poker credits value.
     IsCompetitiveMode() && PlayerWonCasinoGameThisFrame(FinalCasinoGameName) && OpponentsCash() == 0
 )
 
-achievement("Unmade Man", "[Competitive/Draw Poker] Defeat any gangster by making him run out of Draw Poker Credits", 5,
+achievement("Unmade Man", "Draw Poker - Defeat any gangster by making him run out of Draw Poker Credits", 5,
     IsCompetitiveMode() && PlayerWonCasinoGameThisFrame(FinalCasinoGameName) && OpponentsCash() > 0
 )
 
-achievement("Bluff Enough?", "[Competitive/Draw Poker] Place or raise a bet that causes your opponent to fold while your hand rank is less than one pair", 10,
+achievement("Bluff Enough?", "Draw Poker - Place or raise a bet that causes your opponent to fold while your hand rank is less than one pair", 10,
     // We could limit this to 2nd draw only (if a memory address can be found to detect 2nd draw), but I've never seen the AI fold on the 1st draw 
     // in response to the player's bet, so that might be pointless.
     IsCompetitiveMode() && PlayerWonHand_ThisFrame() &&
@@ -1433,7 +1605,7 @@ achievement("Bluff Enough?", "[Competitive/Draw Poker] Place or raise a bet that
     // disable_when(PlayersHandRankingType() != Poker_HandRankingTypeDict["None"], <player placed bet/raised>)
 )
 
-achievement("Frugal Strats", "[Competitive/Slots] Win at slots without buying any cheats/bonus items nor placing any bets over $10 (3x multiplier allowed)", 3,
+achievement("Frugal Strats", "Slots - Beat your opponent without buying any cheats/bonus items nor placing any bets over $10 (3x mult. is allowed)", 3,
     IsCompetitiveMode() && IsPlayingSlots() && PlayerWonCasinoGameThisFrame("Slots") &&
     disable_when(PlayerPurchasedCheat(true) ||
         // If player purchases a bonus item, it will initally appear in the player's slot machine's central column
@@ -1453,12 +1625,12 @@ achievement("Frugal Strats", "[Competitive/Slots] Win at slots without buying an
 // Collection Achievements
 // ----------------------------------------------
 
-achievement("Depression-Era Millionaire", "[Competitive/Any Mission] Accumulate at least $1 million total end-of-mission winnings (excludes password winnings)", 10,
+achievement("Depression-Era Millionaire", "Earn at least $1 million total end-of-mission winnings (excludes password-loaded winnings)", 10,
     IsCompetitiveMode() && TotalMissionWinnings() > 1000000
 //    (TotalMissionWinnings() + PlayersCurrentMissionCashTotal())
 )
 
-achievement("High Stakes High Roller", "[Competitive/Any Mission] Accumulate at least $1.5 million total end-of-mission winnings (excludes password winnings)", 25,
+achievement("High Stakes High Roller", "Earn at least $1.5 million total end-of-mission winnings (excludes password-loaded winnings)", 25,
     IsCompetitiveMode() && TotalMissionWinnings() > 1500000
 )
 
@@ -1466,40 +1638,66 @@ achievement("High Stakes High Roller", "[Competitive/Any Mission] Accumulate at 
 // Challenge Achievements
 // ----------------------------------------------
 
-achievement("Forever 21", "[Competitive/Blackjack] Score at least five blackjacks in one game vs. any gangster", 10,
+achievement("Sus Hands Are Afoot", "Blackjack - Make your opponent bust with a \"very non-suspicious\" hand value of 35 points or more", 5,
+    IsCompetitiveMode() && IsPlayingBlackjack() && BlackjackOpponent_BustedThisFrame(35)
+)
+
+achievement("Forever 21", "Blackjack - Score at least five Blackjacks in one game", 10,
     IsCompetitiveMode() && IsPlayingBlackjack() && never(StartedMissionThisFrame()) &&
     // Used tally() instead of repeated() to avoid "combined || and && logic too complex for subclause" compile error
     tally(5, BlackjackPlayer_WonMainHandWithBlackjackThisFrame(), BlackjackPlayer_WonSplitHandWithBlackjackThisFrame())
 )
 
-achievement("What Big Hands You Have", "[Competitive/Blackjack] Have 8 cards in your Blackjack hand (bust allowed on last card)", 10,
-    IsCompetitiveMode() && IsPlayingBlackjack() && (PlayersHandCardCount() >= 8 || PlayersSplitHandCardCount() >= 8)
+achievement("What Big Hands You Have", "Blackjack - Have eight cards in your hand (bust allowed on last card)", 10,
+    IsPlayingBlackjack() && (PlayersHandCardCount() >= 8 || PlayersSplitHandCardCount() >= 8) // && IsCompetitiveMode()
 )
 
-//achievement("I Ain't Got All Day", "[Competitive/Blackjack] Save time by having your opponent run out of cash before Hand 10", 10,
+//achievement("I Ain't Got All Day", "Blackjack - Save time by having your opponent run out of cash before Hand 10", 10,
 //    IsCompetitiveMode() && PlayerWonCasinoGameThisFrame("Blackjack") && HandNumber() <= 9 &&
 //    OpponentsCash() == 0 // this check is likely redundant because cash-out is the only way for the opponent to lose early
 //)
 
-achievement("Knew When to Hold 'Em", "[Competitive/Draw Poker] When your opponent raises your bet, keep playing the hand and win it", 5,
-    // TODO: Handle case where opponent makes bet, player calls or player bets/opponent calls, 2nd deal, then opponent makes bet (never raised)
-    IsPlayingDrawPoker() && PlayerWonHand_ThisFrame() && never(Increased(HandNumber())) &&
+achievement("Rosetti No Spaghetti", "Blackjack - Win all possible hands (allowed to lose on dealer B.J. or push on dealer 21)", 10,
+    // Note: it is possible to achieve this and still lose the casino game if your opponent ends with more cash
+    IsCompetitiveMode() && IsPlayingBlackjack() && EndedCasinoGameThisFrame() && // PlayerWonCasinoGameThisFrame("Blackjack") && 
+        tally(10, BlackjackPlayer_WonMainHandThisFrame(), BlackjackPlayer_WonSplitHandThisFrame(), BlackjackDealer_HasBlackjackThisFrame(),
+        BlackjackPlayer_MainHandPush21ThisFrame(), BlackjackPlayer_SplitHandPush21ThisFrame(), deduct(BlackjackPlayer_SplitThisFrame())) &&
+        never(StartedMissionThisFrame())
+    // Replaced problematic logic below with tally(10) that adds wins, dealer BJ, and dealer 21 + push, and subtracts on split
+
+//    disable_when(BlackjackPlayer_MainHandAvoidableLoss(), StartedMissionThisFrame()) &&
+//    disable_when(BlackjackPlayer_MainHandAvoidablePush(), StartedMissionThisFrame()) &&
+//    disable_when(BlackjackPlayer_SplitHandAvoidableLoss(), StartedMissionThisFrame()) &&
+//    disable_when(BlackjackPlayer_SplitHandAvoidablePush(), StartedMissionThisFrame())
+
+    // A single disable_when() with || conditions and until clause (ResetNextIf) would be preferable here, but the logic is too
+    // complex for RAScript to generate it.
+//    (   
+//        (
+//            disable_when(BlackjackPlayer_MainHandAvoidableLoss()) && disable_when(BlackjackPlayer_MainHandAvoidablePush()) &&
+//            disable_when(BlackjackPlayer_SplitHandAvoidableLoss()) && disable_when(BlackjackPlayer_SplitHandAvoidablePush())
+//        ) || never(StartedMissionThisFrame())
+//    )
+)
+
+achievement("Knew When to Hold 'Em", "Draw Poker - When your opponent raises your bet, keep playing the hand and win it", 5,
+    IsPlayingDrawPoker() && PlayerWonHand_ThisFrame() && never(Increased(HandNumber())) && // never(Increased(DrawNumber())) &&
 //    once(DrawPokerPlayer_PlacedBetThisFrame()) &&
     once(DrawPokerOpponent_RaisedBetThisFrame())
 )
 
-achievement("Rosetti No Spaghetti", "[Competitive/Draw Poker] Defeat any gangster in draw poker without losing a single hand", 10,
-    // TODO (maybe): change to Blackjack and exclude dealer BJ?
-    IsCompetitiveMode() &&  PlayerWonCasinoGameThisFrame("Draw Poker") && disable_when(DrawPokerPlayer_LostHandThisFrame(), StartedMissionThisFrame())
-)
+//achievement("Rosetti No Spaghetti", "Draw Poker - Win without losing a single hand", 10,
+//    // TODO (maybe): change to Blackjack and exclude dealer BJ?
+//    IsCompetitiveMode() && PlayerWonCasinoGameThisFrame("Draw Poker") && disable_when(DrawPokerPlayer_LostHandThisFrame(), StartedMissionThisFrame())
+//)
 
-achievement("Honest Pete", "[Competitive/Mission 1] Complete Mission 1 without buying any cheats from Shady", 10,
+achievement("Honest Pete", "Complete Mission 1 without buying any cheats from Shady", 10,
     IsCompetitiveMode() && DisplayedMissionNumber() == 1 && once(StartedMissionThisFrame()) && never(PlayerPurchasedCheat(false)) && trigger_when(WonMissionThisFrame())
 // This alternative logic should have the same end result in terms of achievement functionality as once/never, but it uses an (uneeded) PauseLock
 //     disable_when(PlayerPurchasedCheat(false), StartedMissionThisFrame())
 )
 
-achievement("Cheatin' Pete", "[Competitive/Mission 2] Complete Mission 2 while buying out every cheat from Shady (twice per casino game, from 0 to max qty)", 10,
+achievement("Cheatin' Pete", "Complete Mission 2 while buying out every cheat from Shady (twice per casino game, from 0 to max qty)", 10,
     // We need to reset the count at the start of the mission (rather than just start the count, as done for "Honest Pete")
     IsCompetitiveMode() && never(StartedMissionThisFrame()) && WonMissionThisFrame() &&
     // Note: cannot use MeasuredIf to check if at Shady because the cheat qty can increase if player cancels out of a cheat (such as Swap Card) during gameplay,
@@ -1507,29 +1705,84 @@ achievement("Cheatin' Pete", "[Competitive/Mission 2] Complete Mission 2 while b
     measured(repeated(MaxCheatsPerMission, DisplayedMissionNumber() == 2 && IsAtScreen("Shady") && PlayerPurchasedCheatThisFrame()))
 )
 
-achievement("I Ain't Got All Day", "[Competitive/Mission 3] Complete Mission 3 in 6 hands or less of Draw Poker", 10,
+achievement("I Ain't Got All Day", "Complete Mission 3 in six hands of Draw Poker or less", 10,
     IsCompetitiveMode() && DisplayedMissionNumber() == 3 && IsPlayingDrawPoker() && HandNumber() <= 6 && trigger_when(WonMissionThisFrame())
 )
 
-achievement("Name TBD", "[Competitive/Mission 4] Complete Mission 4 with at least 350K in cash winnings", 10,
-    IsCompetitiveMode() && DisplayedMissionNumber() == 4 && Increased(Winnings(4)) && Winnings(4) >= 350000 && measured(PlayersCurrentMissionCashTotal() >= 350000)
-)
+//achievement("Name TBD", "Complete Mission 4 with at least 350K in cash winnings", 10,
+//    IsCompetitiveMode() && DisplayedMissionNumber() == 4 && Increased(Winnings(4)) && Winnings(4) >= 350000 && measured(PlayersCurrentMissionCashTotal() >= 350000)
+//)
 
-achievement("Al Cologne Now Sleeps With The Fishes", "[Competitive/All Missions] Defeat Al Cologne in all four casino games (in a single playthrough)", 25,
+achievement("Lucky Louis Sleeps With the Fishes", "Complete Mission 4 without losing any casino games", 10,
     // TODO (maybe): rewrite as the reverse check (invalidate when a casino game lost, otherwise awarded at game end) so a trigger flag can be added?
-    WonCompetitiveModeThisFrame() && PlayerWonAllCasinoGamesThisFrame()
+    IsCompetitiveMode() && DisplayedMissionNumber() == 4 && PlayerWonAllCasinoGamesThisFrame()
 )
 
-//achievement("The Ultimate Stakes", "[Competitive/All Missions] Defeat all five gangsters without losing any casino games (nor using a password)", 50,  
+achievement("Al Col-Owned", "Complete Mission 5 with at least 12 Draw Poker Credits remaining", 25,
+    WonCompetitiveModeThisFrame() && PlayersScoreCardTotal() >= 12
+)
+
+//achievement("The Ultimate Stakes", "Defeat all five gangsters without losing any casino games (nor using a password)", 50,  
 //    // Count missions with all casino games won up to 5, reset at the start of competitive mode
 //    WonCompetitiveModeThisFrame() && repeated(5, PlayerWonAllCasinoGamesThisFrame()) && disable_when(UsedCompetitiveModePassword(), StartedCompetitiveModeNewGameThisFrame())
 //)
 
-achievement("Craptastic", "[Practice/Craps] Have exactly 9 bets on the table and win them all on the same roll", 10,
-    IsPlayingCraps() && always_false() // TODO: implement this (disabled for now)
+// ----------------------------------------------
+// Craps Achievements
+// ----------------------------------------------
+
+achievement("Craps Academy - It's Only Natural", "Craps - Win a Pass line bet by rolling a \"natural\" (7 or 11) on the come-out roll", 1,
+    IsPlayingCraps() && CrapsRoll_IsNatural() && CrapsPlayer_WonBetThisFrame(PassBetAmount())
 )
 
-achievement("Baby Needs New Shoes!", "[Practice/Craps] Starting with $10,000, double your money", 10,
+achievement("Craps Academy - Got the Craps", "Craps - Win a Don't Pass line bet by rolling \"craps\" (2 or 3 to win, 12 to push) on the come-out roll", 1,
+    IsPlayingCraps() && CrapsRoll_IsCraps() && CrapsPlayer_WonBetThisFrame(DontPassBetAmount())
+)
+
+achievement("Craps Academy - Hold the Line", "Craps - Establish a \"point number\" (4-6 or 8-10) on the come-out roll, then win a Come line bet by rolling 7 or 11", 1,
+    IsPlayingCraps() && CrapsRoll_IsNatural() && CrapsPlayer_WonBetThisFrame(ComeBetAmount())
+)
+
+achievement("Craps Academy - Mama Told Me Not To", "Craps - Establish a \"point number\" (4-6 or 8-10) on the come-out roll, then win a Don't Come line bet by rolling 2 or 3 (12 to push)", 1,
+    IsPlayingCraps() && CrapsRoll_IsCraps() && CrapsPlayer_WonBetThisFrame(DontComeBetAmount())
+)
+
+achievement("Craps Academy - OK, OK, I Get the Point",
+    "Craps - Establish a \"point number\" (4-6 or 8-10) on the come-out roll, then win a Pass or Pass Odds line bet by rolling the point number", 1,
+    IsPlayingCraps() && CrapsRoll_IsPoint() && (CrapsPlayer_WonBetThisFrame(PassBetAmount()) || CrapsPlayer_WonBetThisFrame(PassOddsBetAmount()))
+)
+
+achievement("Craps Academy - What's in the Box?",
+    "Craps - Establish a \"point number\" (4-6 or 8-10) on the come-out roll, then win a Don't Pass or Don't Pass Odds line bet by \"sevening out\" (roll a 7)", 1,
+    IsPlayingCraps() && CombinedDiceRoll() == 7 && (CrapsPlayer_WonBetThisFrame(DontPassBetAmount()) || CrapsPlayer_WonBetThisFrame(DontPassOddsBetAmount()))
+)
+
+achievement("Craps Academy - Crapshoot", "Craps - Win at least 3 different single-roll bets (Craps #, Seven, Yoleven, Any Craps, C & E, Horn, Field)", 2,
+    IsPlayingCraps() && CrapsPlayer_WonSingleRollBets(3) && // internally uses tally w/ hit counts to track bets won
+    // Only reset count if player exits craps
+    never(!IsPlayingCraps())
+)
+
+achievement("Craps Academy - Rollin', Rollin', Rollin'", "Craps - Win at least 3 different multi-roll bets (Place #, Buy #, Lay #, Hard #, Big #)", 2,
+    IsPlayingCraps() && CrapsPlayer_WonMultiRollBets(3) && // internally uses tally w/ hit counts to track bets won
+    // Only reset count if player exits craps
+    never(!IsPlayingCraps())
+)
+
+achievement("Putting It All Together", "Craps - Win a line, multi-roll, and single-roll bet on the same roll (without any other bets on the table)", 5,
+    IsPlayingCraps() && unless(CrapsPlayer_PlacedBets(4)) && CrapsPlayer_WonLineBets(1) && CrapsPlayer_WonSingleRollBets(1) && CrapsPlayer_WonMultiRollBets(1)
+    && never(CrapsPlayer_TurnStarted())
+    // && always_false() // TODO: implement this (disabled for now)
+    // This is way too complex - generates over 1000 alt groups and slows RATools to a halt
+// && unless(CrapsPlayer_LostAnyBetThisFrame()) && never(StartedCrapsRollThisFrame()) &&
+//    CrapsPlayer_WonBetThisFrame("Any Line") && CrapsPlayer_WonBetThisFrame("Any Single") && CrapsPlayer_WonBetThisFrame("Any Multi")
+)
+
+achievement("Craptastic", "Craps - Have exactly 9 bets on the table and win them all on the same roll", 10,
+    IsPlayingCraps() && unless(CrapsPlayer_PlacedBets(10)) && CrapsPlayer_WonAnyBets(9) && never(CrapsPlayer_TurnStarted())
+)
+
+achievement("Baby Needs New Shoes!", "Craps - Starting with $10,000, double your money", 10,
     IsPlayingCraps() && once(PlayersCashBCD() == 0x10000) && PlayersCashBCD() >= 0x20000 && never(!IsPlayingCraps())
 )
 
@@ -1595,6 +1848,7 @@ rich_presence_display("[Gameplay Not Started]")
 // ************************************************************************************************
 //                                          Leaderboards
 // ************************************************************************************************
+
 function LB_Cash(mission, is_total) {
     trigger = IsCompetitiveMode() && DisplayedMissionNumber() == mission && PlayerWonDrawPokerFlag() == 1 && Increased(Winnings(mission)) // WonMissionThisFrame()
 
@@ -1619,3 +1873,21 @@ LB_Cash(3, false)
 LB_Cash(4, false)
 LB_Cash(5, false)
 LB_Cash(5, true)
+
+function LB_Credits(mission) {
+    trigger = IsCompetitiveMode() && DisplayedMissionNumber() == mission && PlayersScoreCardTotal() > 0 && WonMissionThisFrame()
+
+
+    title = format("Mission {0} Draw Poker Credits", mission)
+    desc = format("Most Draw Poker Credits remaining on Mission {0} win", mission)
+    credits = PlayersScoreCardTotal()
+
+    // Starts and submits on the same frame
+    leaderboard(title, desc, trigger, always_false(), always_true(), credits)
+}
+
+LB_Credits(1)
+LB_Credits(2)
+LB_Credits(3)
+LB_Credits(4)
+LB_Credits(5)
