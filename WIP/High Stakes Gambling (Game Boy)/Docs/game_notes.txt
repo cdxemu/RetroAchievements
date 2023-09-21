@@ -1,8 +1,10 @@
 TODO:
-* Craps: need to also check if bet is "Off"? (only if not using payouts/player's cash increase)
-* finish any TODOs in rascript code
-* revise Poker achievements to use "Draw Number" where applicable
+* combine the See Next Card/See Deal Down achievements into one - and base it on dealer's hand instead so we don't have to worry about determining if aces are a "soft 11" (dealer ace is always "soft")
+* combine the Pass/Don't Pass (etc.) Craps Academy two achievements into one?
 * more measured/trigger conditions?
+* finish any TODOs in rascript code
+* rescore/final cut
+* Leaderboards - most cash in each casino game?
 
 Done:
 * change Video Poker scoring events to both modes?
@@ -29,7 +31,9 @@ Rejected:
 	-at end of mission: (same frame) "Player's Cash" zeroed out, "Player's Current Mission Cash Total" and "Player's Mission 1 Cash Winnings" set (amount duplicated!)
 	-at start of next mission: "Player's Current Mission Cash Total" reset to 50K
 * change "Academy" achievements description to "Demonstrate..."? (no - gets too long/wordy)
-* Leaderboards - most cash in each casino game? craps?
+* Leaderboards - craps?
+* Craps: need to also check if bet is "Not Working/Off"? (seems this is not needed - either using payouts/player's cash increase, or bet evaluation is skipped when off)
+* revise Poker achievements to use Draw Number where applicable (seems this is not needed)
 
 Playthrough Results:
 M1-R1		W		$59750
@@ -70,27 +74,27 @@ Video Poker:
 * Start of Game
 	"Game State" set to Video Poker Gameplay
 * Start of Hand
-	(Frame 1) "Hand Number" set (starts at 1, [Practice Mode] or next hand number if had previous progress), "Card 1-5 Held" set to 0, "Hand Ranking" and "Card 1-5" are NOT reset
+	(Frame 1) "Hand Number" set (starts at 1, [Practice Mode] or next hand number if had previous progress), "Card 1-5 Held (old)" set to 0, "Hand Ranking" and "Card 1-5" are NOT reset
 	(Frame 7?) "Card Count" set to 0, "Actual Payout" set to 0
 * [Competitive Mode] Shady
 	(if Hand 6) See Shady? Yes/No menu
 	(if Hand 1/6) Shady init - "Game State" set to Shady
-	(if Hand 1/6) Shady init - "Card 1-5 Held" set to Shady values
+	(if Hand 1/6) Shady init - "Card 1-5 Held (old)" set to Shady values
 	(if Hand 1/6) Shady shopping - "Cheat Card 1-5 Quantity" and "Cash" set on each purchase
-	(if Hand 1/6) Shady exit - "Card 1-5 Held" set back to 0
+	(if Hand 1/6) Shady exit - "Card 1-5 Held (old)" set back to 0
 	(if Hand 1/6) Shady exit - "Game State" set back to Video Poker Gameplay
 	Play menu (if Hand 1/6 - Play/Shady menu)
 * 1st Draw
-	"Card Count" set to 5, "Card 1-5" set (with face-down flag)
+	"Card Count" set to 5, "Card 1-5" set (with face-down flag), "Card Draw/Hold Flags" set to 1
 	(Hand 1 only) "Jackpot" value first displayed on-screen (and starts counting up after this)
 	Betting - Waits for player to select bet amount/multiplier, [Practice Mode] can access Exit Menu, "Cash" set with each multiplier increment
 	"Hand Ranking" set, "Card 1-5" face-up flag set
 	Face-up cards revealed to player
-	"Draw Number" set to 1
+	"Draw Number" set to 1, "Is Opponent's Turn" set to 0/1 (depending on whose turn is first)
 * [Competitive Mode] Swap Card
-	Opponent AI decision-making? - "Hand Ranking" and "Card 1-5" set many times (for both Player/Opponent)
-	Opponent card swap - "Hand Ranking" and "Card 1-5" set (for both Player/Opponent)
-	Player card selection - "Swap Card Player/Opponent Card Number" set, "Hand Ranking" and "Card 1-5" NOT set at this point
+	Opponent AI decision-making? - "Is Opponent's Turn" set to 0, "Hand Ranking" and "Card 1-5" set many times (for both Player/Opponent)
+	Opponent card swap - "Hand Ranking" and "Card 1-5" set (for both Player/Opponent), "Is Opponent's Turn" set to 1
+	Player card selection - "Is Opponent's Turn" set to 0, "Swap Card Player/Opponent Card Number" set, "Hand Ranking" and "Card 1-5" NOT set at this point
 	Player card swap - "Hand Ranking" and "Card 1-5" set (for both Player/Opponent), card alternates between face-up/face-down a few times and sets "Card 1-5" flag each time
 	(above repeats for Opponent/Player if they use 2nd Swap Card)
 * [Competitive Mode] Cheats
@@ -99,11 +103,11 @@ Video Poker:
 	Player Joker card selection - "Hand Ranking" NOT set
 	Player Joker card swap - "Hand Ranking" and "Card 1-5" set
 * Held Cards Selection
-	Player selects held cards - "Card 1-5 Held" flags set when Hold button(s) clicked
+	Player selects held cards - "Card Draw/Hold Flags", "Card 1-5 Held (old)" flags set when Hold button(s) clicked
 	Waits for player to press Draw button
-	Non-held cards become face-down and have their "Card 1-5" face-down flag set, all "Card 1-5 Held" set to 3
+	Non-held cards become face-down and have their "Card 1-5" face-down flag set, all "Card 1-5 Held (old)" set to 3
 * 2nd Draw
-	one-by-one (from L to R), each non-held card has "Card 1-5" set (with face-up flag) and then is revealed face-up to player
+	one-by-one (from L to R), each non-held card has "Card 1-5" set (with face-up flag), its "Card Draw/Hold Flag" set to 0, and is revealed face-up to player
 	"Draw Number" set to 2
 * [Competitive Mode] Swap Card
 	same steps as in 1st Draw
@@ -116,7 +120,7 @@ Video Poker:
 	[Practice Mode] waits for player input, [Competitive Mode] (if Hand 1-9) Play menu
 	all cards turned face-down and "Card 1-5" face-down flag set (for both Player/Opponent)
 * [Competitive Mode] End of Game
-	"Card 1-5 Held" set to 0
+	"Card 1-5 Held (old)" set to 0
 	music switched to win/loss music, "Cheat Card 1-5 Quantity" set to 0
 	(if won) Cash Prize Screen displayed and "Game State" set
 	(if won, when leaving Cash Prize screen) "Current Mission Games Won" set, "Cash" set to 0, "Current Mission Cash Total" set
@@ -169,6 +173,8 @@ Craps:
 * (Repeats from Bet Placed/Roll)
 
 Misc:
+Blackack: dealer stands on 17+, hits on <16, hits on "soft 17"
+
 Slots Jackpot Odds:
  1/8000 	(without cheating)		0.0125%
 27/8000 	(gold coin)				0.3375%
@@ -184,3 +190,4 @@ Game Bugs/Unexpected Behavior
 * Blackjack: (not a bug - implementation detail) "Player's Hand Card 1-8" are not cleared out after each hand, only overwritten individually as you are dealt new cards
 * Blackjack: (not a bug - seems intended) Splitting Aces doesn't allow you to "Hit" (nor use Ace/King cheats), only "Stand/Cheat" on both hands
 * Craps: (bug or non-standard craps rules) some single-roll bets (Any Craps, Craps 2/3/12, Seven, Yoleven) remain in play after winning the bet (but not after losing it)
+* Video Poker: during the "Swap Card" phase of opponent's turn, while it can't be seen, in memory, the player's and opponent's card values are rapidly being swapped around (presumably to calculate opponent's move)
