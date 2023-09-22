@@ -1,10 +1,4 @@
 TODO:
-* combine the See Next Card/See Deal Down achievements into one - and base it on dealer's hand instead so we don't have to worry about determining if aces are a "soft 11" (dealer ace is always "soft")
-* combine the Pass/Don't Pass (etc.) Craps Academy two achievements into one?
-* more measured/trigger conditions?
-* finish any TODOs in rascript code
-* rescore/final cut
-* Leaderboards - most cash in each casino game?
 
 Done:
 * change Video Poker scoring events to both modes?
@@ -23,6 +17,10 @@ Done:
 * Craps: fix "too complex" achievements
     count # of bets made at end of players turn - must be equal to X
     on AI turn, count/check winning bets
+* combine the See Next Card/See Deal Down achievements into one - and base it on dealer's hand instead so we don't have to worry about determining if aces are a "soft 11" (dealer ace is always "soft")
+* finish any TODOs in rascript code
+* more measured/trigger conditions?
+* rescore/final cut
 
 Rejected:
 * replace basic slots criteria from "2 lines" to "combined payout of at least 10x your bet"?
@@ -34,6 +32,8 @@ Rejected:
 * Leaderboards - craps?
 * Craps: need to also check if bet is "Not Working/Off"? (seems this is not needed - either using payouts/player's cash increase, or bet evaluation is skipped when off)
 * revise Poker achievements to use Draw Number where applicable (seems this is not needed)
+* combine the Pass/Don't Pass (etc.) Craps Academy two achievements into one?
+* Leaderboards - most cash in each casino game? (Slots/VP mostly luck, BJ not much variation)
 
 Playthrough Results:
 M1-R1       W       $59750

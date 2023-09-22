@@ -14,8 +14,8 @@ function ControllerInputAFlag() => bit0(0x00C2AE)
 function CurrentCasinoGame() => byte(0x00C2B1)
 CurrentCasinoGameDict = {"Blackjack": 0x01, "Craps": 0x02, "DrawPoker": 0x04, "Slots": 0x08, "VideoPoker": 0x10}
 function GameState() => byte(0x00C2B2)
-GameStateDict = {"VideoPoker": 0x00, "MissionScore": 0x01, "GangsterPortrait": 0x02, "CashPrize": 0x04, "ModeOrPlayPasswordSelect": 0x05, "Shady": 0x06,
-    "CompetitiveSlots":0x07, "BlackjackOrDrawPoker": 0x08, "TitleScreen": 0x09, "ScoreCard": 0x0B, "CopyrightScreen": 0x20}
+GameStateDict = {"MissionScore": 0x01, "GangsterPortrait": 0x02, "CashPrize": 0x04, "ModeOrPlayPasswordSelect": 0x05, "Shady": 0x06,
+    "TitleScreen": 0x09, "ScoreCard": 0x0B, "CopyrightScreen": 0x20}
 function CombinedDiceRoll() => byte(0x00C2B4)
 function MenuProperty() => byte(0x00C2BC)
 MenuPropertyDict = {"Insurance": 0x08}
@@ -274,18 +274,10 @@ function StartedMissionThisFrame() {
     return IsAtScreen("GangsterPortrait") && Changed(GameState())
 }
 
-function StartedCompetitiveModeThisFrame() {
-   return IsCompetitiveMode() &&
-          prev(CompetitiveProgressIndicator()) != CompetitiveProgressIndicatorDict["Started"]
-}
+function StartedCompetitiveModeThisFrame() => IsCompetitiveMode() && prev(CompetitiveProgressIndicator()) != CompetitiveProgressIndicatorDict["Started"]
+function StartedCompetitiveModeNewGameThisFrame() => StartedCompetitiveModeThisFrame() && DisplayedMissionNumber() == 1
 
-function StartedCompetitiveModeNewGameThisFrame() {
-   return StartedCompetitiveModeThisFrame() && DisplayedMissionNumber() == 1
-}
-
-function WonMissionThisFrame() {
-    return PlayerWonCasinoGameThisFrame(FinalCasinoGameName)
-}
+function WonMissionThisFrame() => PlayerWonCasinoGameThisFrame(FinalCasinoGameName)
 
 function WonCompetitiveModeThisFrame() {
     FinalMissionNum = 5
@@ -313,9 +305,7 @@ function Winnings(mission) {
         return PlayersMission5CashWinnings()
 }
 
-function TotalMissionWinnings() {
-    return Winnings(1) + Winnings(2) + Winnings(3) + Winnings(4) +  Winnings(5)
-}
+function TotalMissionWinnings() => Winnings(1) + Winnings(2) + Winnings(3) + Winnings(4) +  Winnings(5)
 
 function AnyMissionWinningsAtLeast(cash_amount) {
     return (Increased(Winnings(1)) && Winnings(1) >= cash_amount) ||
@@ -371,7 +361,6 @@ function BlackjackPlayer_WonSplitHandWithBlackjack() => BlackjackPlayer_WonSplit
 function BlackjackPlayer_WonMainHandWithBlackjackThisFrame() => Changed(PlayersHandResult()) && BlackjackPlayer_WonMainHandWithBlackjack()
 function BlackjackPlayer_WonSplitHandWithBlackjackThisFrame() => Changed(PlayersSplitHandResult()) && BlackjackPlayer_WonSplitHandWithBlackjack()
 function BlackjackPlayer_WonEitherWithBlackjackThisFrame() => BlackjackPlayer_WonMainHandWithBlackjackThisFrame() ||  BlackjackPlayer_WonSplitHandWithBlackjackThisFrame()
-
 function BlackjackPlayer_WonMainHandThisFrame() => Changed(PlayersHandResult()) && BlackjackPlayer_WonMainHand()
 function BlackjackPlayer_WonSplitHandThisFrame() => Changed(PlayersSplitHandResult()) && BlackjackPlayer_WonSplitHand()
 
@@ -405,6 +394,10 @@ function BlackjackOpponent_MainHandBusted() => OpponentsHandResult_IsWonOrTiedFl
 function BlackjackOpponent_SplitHandBusted() => OpponentsSplitHandResult_IsWonOrTiedFlag() == 0 && OpponentsSplitHandResult_IsSpecialFlag() == 1
 
 function BlackjackOpponent_SwappedThisFrame(min_points) {
+    // Order of events:
+    // * Player's Swap Card Cheat Quantity decremented (then incremented if player cancels out of it)
+    // * Swap animation plays
+    // * Opponent's Hand Point Value updated
     return (OpponentsHandPointValue() > min_points && prev(OpponentsHandPointValue()) <= min_points && OpponentsHandCardCount() == prev(OpponentsHandCardCount())) ||
     (OpponentsSplitHandPointValue() > min_points && prev(OpponentsSplitHandPointValue()) <= min_points && OpponentsSplitHandCardCount() == prev(OpponentsSplitHandCardCount()))
 }
@@ -550,6 +543,7 @@ function PokerPlayer_NoCardsWereHeld() {
 function CrapsRoll_IsNatural() => CombinedDiceRoll() == 7 || CombinedDiceRoll() == 11
 function CrapsRoll_IsCraps() => CombinedDiceRoll() == 2 || CombinedDiceRoll() == 3 || CombinedDiceRoll() == 12
 function CrapsRoll_IsPoint() => CombinedDiceRoll() == EstablishedPointNumber()
+
 function CrapsPlayer_TurnPaused() => IsCrapsPlayersTurn() == 0
 function CrapsPlayer_TurnEnded() => Decreased(IsCrapsPlayersTurn())
 function CrapsPlayer_TurnStarted() => Increased(IsCrapsPlayersTurn())
@@ -642,9 +636,7 @@ function CrapsPlayer_WonBetThisFrameByAmount(bet_amount) {
     return CrapsPlayer_TurnPaused() && ZeroedOut(bet_amount) && Increased(PlayersCashBCD())
 }
 
-function CrapsPlayer_HadBetOn(bet_type) {
-    return prev(GetCrapsBetAmount(bet_type)) > 0
-}
+function CrapsPlayer_HadBetOn(bet_type) => prev(GetCrapsBetAmount(bet_type)) > 0
 
 function CrapsPlayer_WonBetThisFrame(bet_type) {
     // When a bet is won, the associated bet amount is zeroed out on the same frame the player's cash is increased (to refund the bet amount)
@@ -653,24 +645,13 @@ function CrapsPlayer_WonBetThisFrame(bet_type) {
         // version of this function instead (which didn't work with "Any Craps" and other single-roll bets).
         return CrapsPlayer_WonBetThisFrameByAmount(GetCrapsBetAmount(bet_type))
     else
-        return CrapsPlayer_TurnPaused() && CrapsPlayer_HadBetOn(bet_type) && CrapsBetType() == CrapsBetTypeDict[bet_type] && IsCrapsBetWon() == 1 // && Changed(CrapsBetType())
+        return CrapsPlayer_TurnPaused() && CrapsPlayer_HadBetOn(bet_type) && CrapsBetType() == CrapsBetTypeDict[bet_type] && IsCrapsBetWon() == 1
 }
 
-function CrapsPlayer_WonLineBets(bet_count) {
-    return tally_of(LineBetTypes, bet_count, bet_type => once(CrapsPlayer_WonBetThisFrame(bet_type)))
-}
-
-function CrapsPlayer_WonSingleRollBets(bet_count) {
-    return tally_of(SingleBetTypes, bet_count, bet_type => once(CrapsPlayer_WonBetThisFrame(bet_type)))
-}
-
-function CrapsPlayer_WonMultiRollBets(bet_count) {
-    return tally_of(MultiBetTypes, bet_count, bet_type => once(CrapsPlayer_WonBetThisFrame(bet_type)))
-}
-
-function CrapsPlayer_WonAnyBets(bet_count) {
-    return tally_of(AllBetTypes, bet_count, bet_type => once(CrapsPlayer_WonBetThisFrame(bet_type)))
-}
+function CrapsPlayer_WonLineBets(bet_count) => tally_of(LineBetTypes, bet_count, bet_type => once(CrapsPlayer_WonBetThisFrame(bet_type)))
+function CrapsPlayer_WonSingleRollBets(bet_count) => tally_of(SingleBetTypes, bet_count, bet_type => once(CrapsPlayer_WonBetThisFrame(bet_type)))
+function CrapsPlayer_WonMultiRollBets(bet_count) => tally_of(MultiBetTypes, bet_count, bet_type => once(CrapsPlayer_WonBetThisFrame(bet_type)))
+function CrapsPlayer_WonAnyBets(bet_count) => tally_of(AllBetTypes, bet_count, bet_type => once(CrapsPlayer_WonBetThisFrame(bet_type)))
 
 function CrapsPlayer_PlacedBet(bet_amount) {
     // When a bet is won, the associated bet amount is zeroed out on the same frame the player's cash is increased (to refund the bet amount)
@@ -680,9 +661,7 @@ function CrapsPlayer_PlacedBet(bet_amount) {
     return CrapsPlayer_TurnEnded() && bet_amount > 0
 }
 
-function CrapsPlayer_PlacedBets(bet_count) {
-    return tally_of(AllBetAmounts, bet_count, bet_amount => once(CrapsPlayer_PlacedBet(bet_amount)))
-}
+function CrapsPlayer_PlacedBets(bet_count) => tally_of(AllBetAmounts, bet_count, bet_amount => once(CrapsPlayer_PlacedBet(bet_amount)))
 
 // ************************************************************************************************
 //                                          Achievements
@@ -738,9 +717,9 @@ function WinStageAchievement(mission, casino_game_num, ach_title, ach_points, ac
 
 // Add achievements for winning each Competitive Mode mission/casino game
 // Mission 1 - Machine Gun Max
-WinStageAchievement(1, 1, "Call Me Bulletproof Bob", 2, 356414)
-WinStageAchievement(1, 2, "Beginner's Luck?", 2, 356415)
-WinStageAchievement(1, 3, "Loserus Maximus", 2, 356416)
+WinStageAchievement(1, 1, "Call Me Bulletproof Bob", 3, 356414)
+WinStageAchievement(1, 2, "Beginner's Luck?", 3, 356415)
+WinStageAchievement(1, 3, "Loserus Maximus", 3, 356416)
 WinStageAchievement(1, 4, "Max Maxed Out", 5, 356417)
 // Mission 2 - Suitcase Sam
 WinStageAchievement(2, 1, "Suitcase Shakedown", 3, 356418)
@@ -785,10 +764,6 @@ achievement("Ready to Take a Stand", "Blackjack - Stand with a hand value betwee
     , id=357313)
 
 achievement("An Offer He Can't Refuse", "Blackjack - Use Swap Card to raise your opponent's hand value above 21 points", 2,
-    // Order of events:
-    // * Player's Swap Card Cheat Quantity decremented (then incremented if player cancels out of it)
-    // * Swap animation plays
-    // * Opponent's Hand Point Value updated
     IsCompetitiveMode() && IsPlayingBlackjack() && BlackjackOpponent_SwappedThisFrame(21)
     , id=356437)
 
@@ -904,10 +879,10 @@ achievement("Sus Hands Are Afoot", "Blackjack - Make your opponent bust with a \
     IsCompetitiveMode() && IsPlayingBlackjack() && BlackjackOpponent_BustedThisFrame(35)
     , id=356457)
 
-achievement("Forever 21", "Blackjack - Score at least five Blackjacks in one game", 10,
+achievement("Forever 21", "Blackjack - Score at least five Blackjacks in one game", 5,
     IsCompetitiveMode() && IsPlayingBlackjack() && never(StartedMissionThisFrame()) &&
     // Used tally() instead of repeated() to avoid "combined || and && logic too complex for subclause" compile error
-    tally(5, BlackjackPlayer_WonMainHandWithBlackjackThisFrame(), BlackjackPlayer_WonSplitHandWithBlackjackThisFrame())
+    measured(tally(5, BlackjackPlayer_WonMainHandWithBlackjackThisFrame(), BlackjackPlayer_WonSplitHandWithBlackjackThisFrame()))
     , id=356458)
 
 achievement("What Big Hands You Have", "Blackjack - Have eight cards in your hand (bust allowed on last card)", 10,
@@ -939,7 +914,6 @@ achievement("I Ain't Got All Day", "Complete Mission 3 in six hands of Draw Poke
     , id=356464)
 
 achievement("Lucky Louis Sleeps With the Fishes", "Complete Mission 4 without losing any casino games", 10,
-    // TODO (maybe): rewrite as the reverse check (invalidate when a casino game lost, otherwise awarded at game end) so a trigger flag can be added?
     IsCompetitiveMode() && DisplayedMissionNumber() == 4 && PlayerWonAllCasinoGamesThisFrame()
     , id=356465)
 
@@ -978,13 +952,13 @@ achievement("Craps Academy: What's in the Box?",
     , id=356472)
 
 achievement("Craps Academy: Crapshoot", "Craps - Win at least 5 different single-roll bets (Craps #, Seven, Yoleven, Any Craps, C & E, Horn, Field)", 2,
-    IsPlayingCraps() && CrapsPlayer_WonSingleRollBets(5) && // internally uses tally w/ hit counts to track bets won
+    IsPlayingCraps() && measured(CrapsPlayer_WonSingleRollBets(5)) && // internally uses tally w/ hit counts to track bets won
     // Only reset count if player exits craps
     never(!IsPlayingCraps())
     , id=356473)
 
 achievement("Craps Academy: Rollin', Rollin', Rollin'", "Craps - Win at least 5 different multi-roll bets (Place #, Buy #, Lay #, Hard #, Big #)", 2,
-    IsPlayingCraps() && CrapsPlayer_WonMultiRollBets(5) && // internally uses tally w/ hit counts to track bets won
+    IsPlayingCraps() && measured(CrapsPlayer_WonMultiRollBets(5)) && // internally uses tally w/ hit counts to track bets won
     // Only reset count if player exits craps
     never(!IsPlayingCraps())
     , id=356474)
