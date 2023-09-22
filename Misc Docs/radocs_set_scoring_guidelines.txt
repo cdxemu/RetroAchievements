@@ -1,12 +1,12 @@
 Scoring:
 
-Points	Difficulty		Significance
+Points  Difficulty      Significance
 ---------------------------------------------------------------
-0-5 	Easy 			Minor - Collect a power-up/beat a stage
-10 		Medium 			Intermediate - Beat a boss
-25 		Hard 			Major - Beat the game
-50 		Very Hard 		Game completion
-100 	"Impossible" 	Typically for bonus sets
+0-5     Easy            Minor - Collect a power-up/beat a stage
+10      Medium          Intermediate - Beat a boss
+25      Hard            Major - Beat the game
+50      Very Hard       Game completion
+100     "Impossible"    Typically for bonus sets
 
 Difficulty Scale (my point approximations)
 1. Freebie (0-1)

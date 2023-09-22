@@ -1,19 +1,19 @@
-****************************************
-         RAScript Cheat Sheet
-****************************************
-prev         			->	Delta
-prior					->	Prior
-&&           			->	AndNext (only if needed, otherwise no flag)
-||           			->	Alt groups (preferred) or OrNext
-__ornext     			->	hint (changes || preference to OrNext)
-repeated/once			->	Hit target
-never        			->	ResetIf
-repeated/once (never)	->	ResetNextIf - e.g. once(condition && never())
-unless       			->	PauseIf
-disable_when (until)	->	Hit target, PauseIf (ResetNextIf)
-tally (deduct)       	->	AddHits (SubHits)
-+, -         			->	AddSource, SubSource
-measured (when)    		->	Measured (MeasuredIf)
-trigger_when 			->	Trigger
-+, -, *, /				->	AddAddress - when used in mem access function - e.g. byte(0x001A + 0x08)
-bcd						->	BCD (address type - replaces Mem)
+****************************************************************************************************
+                                     RAScript Cheat Sheet
+****************************************************************************************************
+prev                   ->  Delta
+prior                  ->  Prior
+&&                     ->  AndNext (only if needed, otherwise no flag)
+||                     ->  Alt groups (preferred) or OrNext
+__ornext               ->  hint (changes || preference to OrNext)
+repeated/once          ->  Hit target
+never                  ->  ResetIf
+repeated/once (never)  ->  ResetNextIf - e.g. once(condition && never())
+unless                 ->  PauseIf
+disable_when (until)   ->  Hit target, PauseIf (ResetNextIf)
+tally (deduct)         ->  AddHits (SubHits)
++, -                   ->  AddSource, SubSource
+measured (when)        ->  Measured (MeasuredIf)
+trigger_when           ->  Trigger
++, -, *, /             ->  AddAddress - when used in mem access function - e.g. byte(0x001A + 0x08)
+bcd                    ->  BCD (address type - replaces Mem)

@@ -12,174 +12,174 @@ Done:
 * test if need GB Bios protection https://docs.retroachievements.org/Console-Specific-Tips/#gb-and-gbc-bios
 * remove 1-2 cherry/1-2 pair practice achievements, merge 2 cherry/2 pair into lowest non-practice
 * Change "any gangster" challenges to be vs. specific gangster (variety pack):
-	Max		use no cheats						(10)
-	Sam		use all cheats						(10)
-	Harry	win DP in <= 6 hands				(10) alt: 350K winnings
-	Louis	win all casino games				(10) alt: 350K winnings
-	Al		win with >= 12 DPP remaining		(25)
-	Alt ideas: 350K winnings, win all DP hands, win X in a row BJ or DP hands, cash out in DP, cash out in BJ (very rare/luck-based), lose first three/win DP, time limit, win two jackpots
+    Max     use no cheats                       (10)
+    Sam     use all cheats                      (10)
+    Harry   win DP in <= 6 hands                (10) alt: 350K winnings
+    Louis   win all casino games                (10) alt: 350K winnings
+    Al      win with >= 12 DPP remaining        (25)
+    Alt ideas: 350K winnings, win all DP hands, win X in a row BJ or DP hands, cash out in DP, cash out in BJ (very rare/luck-based), lose first three/win DP, time limit, win two jackpots
 * redo scoring badges
 * Leaderboard - each mission remaining DPP?
 * Craps: fix "too complex" achievements
-	count # of bets made at end of players turn - must be equal to X
-	on AI turn, count/check winning bets
+    count # of bets made at end of players turn - must be equal to X
+    on AI turn, count/check winning bets
 
 Rejected:
 * replace basic slots criteria from "2 lines" to "combined payout of at least 10x your bet"?
 * change Practice cheevos (except Craps) to either mode?
 * should "Current Mission Cash Total" be included in "Cash Winnings" RP/achievements? (no - after investigation)
-	-at end of mission: (same frame) "Player's Cash" zeroed out, "Player's Current Mission Cash Total" and "Player's Mission 1 Cash Winnings" set (amount duplicated!)
-	-at start of next mission: "Player's Current Mission Cash Total" reset to 50K
+    -at end of mission: (same frame) "Player's Cash" zeroed out, "Player's Current Mission Cash Total" and "Player's Mission 1 Cash Winnings" set (amount duplicated!)
+    -at start of next mission: "Player's Current Mission Cash Total" reset to 50K
 * change "Academy" achievements description to "Demonstrate..."? (no - gets too long/wordy)
 * Leaderboards - craps?
 * Craps: need to also check if bet is "Not Working/Off"? (seems this is not needed - either using payouts/player's cash increase, or bet evaluation is skipped when off)
 * revise Poker achievements to use Draw Number where applicable (seems this is not needed)
 
 Playthrough Results:
-M1-R1		W		$59750
-M1-R2		L		$59777
-M1-R3		W		$76550
-M1-R4		W (CO)	$109790
-M2-PW		Total:	$109790		FKbJPF BbJPFB
-M2-R1		W		$60500
-M2-R2		W		$71499
-M2-R3		W		$140599
-M2-R4		W (DP)	$121509
-M3-PW		Total:	$231299		C9H34F BF?CKB
-M3-R1		W		$60250
-M3-R2		W		$70950
-M3-R3		W		$370136
-M3-R4		W (DP)	$272286
-M4-PW		Total:	$503585		HGb?ML BC7PTB
-M4-R1		L		$45000
-M4-R2		W		$55300
-M4-R3		W		$333805
-M4-R4		W (DP)	$356605
-M5-PW		Total:	$860190		DQ$K?N BbBL8B
-M5-R1		L		$48500
-M5-R2		W		$57450
-M5-R3		W		$336834
-M5-R4		W (CO)	$353934
-M5-End		Total:	$1214124
+M1-R1       W       $59750
+M1-R2       L       $59777
+M1-R3       W       $76550
+M1-R4       W (CO)  $109790
+M2-PW       Total:  $109790     FKbJPF BbJPFB
+M2-R1       W       $60500
+M2-R2       W       $71499
+M2-R3       W       $140599
+M2-R4       W (DP)  $121509
+M3-PW       Total:  $231299     C9H34F BF?CKB
+M3-R1       W       $60250
+M3-R2       W       $70950
+M3-R3       W       $370136
+M3-R4       W (DP)  $272286
+M4-PW       Total:  $503585     HGb?ML BC7PTB
+M4-R1       L       $45000
+M4-R2       W       $55300
+M4-R3       W       $333805
+M4-R4       W (DP)  $356605
+M5-PW       Total:  $860190     DQ$K?N BbBL8B
+M5-R1       L       $48500
+M5-R2       W       $57450
+M5-R3       W       $336834
+M5-R4       W (CO)  $353934
+M5-End      Total:  $1214124
 
 Casino Game Order of Events
 ---------------------------
 Video Poker:
 * Before Game Starts
-	"Current Casino Game" set to Video Poker
+    "Current Casino Game" set to Video Poker
 * [Competitive Mode] Entry Fee
-	Entry Fee/Ante Display Screen displayed and "Game State" set
-	"Current Mission Cash Total" decremented $1000 each frame until Entry Fee amount accounted for
-	"Players Cash" and "Opponent's Cash" set to Entry Fee amount
+    Entry Fee/Ante Display Screen displayed and "Game State" set
+    "Current Mission Cash Total" decremented $1000 each frame until Entry Fee amount accounted for
+    "Players Cash" and "Opponent's Cash" set to Entry Fee amount
 * Start of Game
-	"Game State" set to Video Poker Gameplay
+    "Game State" set to Video Poker Gameplay
 * Start of Hand
-	(Frame 1) "Hand Number" set (starts at 1, [Practice Mode] or next hand number if had previous progress), "Card 1-5 Held (old)" set to 0, "Hand Ranking" and "Card 1-5" are NOT reset
-	(Frame 7?) "Card Count" set to 0, "Actual Payout" set to 0
+    (Frame 1) "Hand Number" set (starts at 1, [Practice Mode] or next hand number if had previous progress), "Card 1-5 Held (old)" set to 0, "Hand Ranking" and "Card 1-5" are NOT reset
+    (Frame 7?) "Card Count" set to 0, "Actual Payout" set to 0
 * [Competitive Mode] Shady
-	(if Hand 6) See Shady? Yes/No menu
-	(if Hand 1/6) Shady init - "Game State" set to Shady
-	(if Hand 1/6) Shady init - "Card 1-5 Held (old)" set to Shady values
-	(if Hand 1/6) Shady shopping - "Cheat Card 1-5 Quantity" and "Cash" set on each purchase
-	(if Hand 1/6) Shady exit - "Card 1-5 Held (old)" set back to 0
-	(if Hand 1/6) Shady exit - "Game State" set back to Video Poker Gameplay
-	Play menu (if Hand 1/6 - Play/Shady menu)
+    (if Hand 6) See Shady? Yes/No menu
+    (if Hand 1/6) Shady init - "Game State" set to Shady
+    (if Hand 1/6) Shady init - "Card 1-5 Held (old)" set to Shady values
+    (if Hand 1/6) Shady shopping - "Cheat Card 1-5 Quantity" and "Cash" set on each purchase
+    (if Hand 1/6) Shady exit - "Card 1-5 Held (old)" set back to 0
+    (if Hand 1/6) Shady exit - "Game State" set back to Video Poker Gameplay
+    Play menu (if Hand 1/6 - Play/Shady menu)
 * 1st Draw
-	"Card Count" set to 5, "Card 1-5" set (with face-down flag), "Card Draw/Hold Flags" set to 1
-	(Hand 1 only) "Jackpot" value first displayed on-screen (and starts counting up after this)
-	Betting - Waits for player to select bet amount/multiplier, [Practice Mode] can access Exit Menu, "Cash" set with each multiplier increment
-	"Hand Ranking" set, "Card 1-5" face-up flag set
-	Face-up cards revealed to player
-	"Draw Number" set to 1, "Is Opponent's Turn" set to 0/1 (depending on whose turn is first)
+    "Card Count" set to 5, "Card 1-5" set (with face-down flag), "Card Draw/Hold Flags" set to 1
+    (Hand 1 only) "Jackpot" value first displayed on-screen (and starts counting up after this)
+    Betting - Waits for player to select bet amount/multiplier, [Practice Mode] can access Exit Menu, "Cash" set with each multiplier increment
+    "Hand Ranking" set, "Card 1-5" face-up flag set
+    Face-up cards revealed to player
+    "Draw Number" set to 1, "Is Opponent's Turn" set to 0/1 (depending on whose turn is first)
 * [Competitive Mode] Swap Card
-	Opponent AI decision-making? - "Is Opponent's Turn" set to 0, "Hand Ranking" and "Card 1-5" set many times (for both Player/Opponent)
-	Opponent card swap - "Hand Ranking" and "Card 1-5" set (for both Player/Opponent), "Is Opponent's Turn" set to 1
-	Player card selection - "Is Opponent's Turn" set to 0, "Swap Card Player/Opponent Card Number" set, "Hand Ranking" and "Card 1-5" NOT set at this point
-	Player card swap - "Hand Ranking" and "Card 1-5" set (for both Player/Opponent), card alternates between face-up/face-down a few times and sets "Card 1-5" flag each time
-	(above repeats for Opponent/Player if they use 2nd Swap Card)
+    Opponent AI decision-making? - "Is Opponent's Turn" set to 0, "Hand Ranking" and "Card 1-5" set many times (for both Player/Opponent)
+    Opponent card swap - "Hand Ranking" and "Card 1-5" set (for both Player/Opponent), "Is Opponent's Turn" set to 1
+    Player card selection - "Is Opponent's Turn" set to 0, "Swap Card Player/Opponent Card Number" set, "Hand Ranking" and "Card 1-5" NOT set at this point
+    Player card swap - "Hand Ranking" and "Card 1-5" set (for both Player/Opponent), card alternates between face-up/face-down a few times and sets "Card 1-5" flag each time
+    (above repeats for Opponent/Player if they use 2nd Swap Card)
 * [Competitive Mode] Cheats
-	Play/Cheat menu - player can select Joker or See Next cheat
-	Player See Next - next card displayed
-	Player Joker card selection - "Hand Ranking" NOT set
-	Player Joker card swap - "Hand Ranking" and "Card 1-5" set
+    Play/Cheat menu - player can select Joker or See Next cheat
+    Player See Next - next card displayed
+    Player Joker card selection - "Hand Ranking" NOT set
+    Player Joker card swap - "Hand Ranking" and "Card 1-5" set
 * Held Cards Selection
-	Player selects held cards - "Card Draw/Hold Flags", "Card 1-5 Held (old)" flags set when Hold button(s) clicked
-	Waits for player to press Draw button
-	Non-held cards become face-down and have their "Card 1-5" face-down flag set, all "Card 1-5 Held (old)" set to 3
+    Player selects held cards - "Card Draw/Hold Flags", "Card 1-5 Held (old)" flags set when Hold button(s) clicked
+    Waits for player to press Draw button
+    Non-held cards become face-down and have their "Card 1-5" face-down flag set, all "Card 1-5 Held (old)" set to 3
 * 2nd Draw
-	one-by-one (from L to R), each non-held card has "Card 1-5" set (with face-up flag), its "Card Draw/Hold Flag" set to 0, and is revealed face-up to player
-	"Draw Number" set to 2
+    one-by-one (from L to R), each non-held card has "Card 1-5" set (with face-up flag), its "Card Draw/Hold Flag" set to 0, and is revealed face-up to player
+    "Draw Number" set to 2
 * [Competitive Mode] Swap Card
-	same steps as in 1st Draw
+    same steps as in 1st Draw
 * Hand Evaluation/Payout
-	(Frame 1) "Hand Ranking" set
-	(Frame 2) "Actual Payout" set (includes Jackpot)
-	(if won) Payout Display - flashes display text with Hand Ranking and Payout $
-	(if won) "Cash" set
+    (Frame 1) "Hand Ranking" set
+    (Frame 2) "Actual Payout" set (includes Jackpot)
+    (if won) Payout Display - flashes display text with Hand Ranking and Payout $
+    (if won) "Cash" set
 * End of Hand
-	[Practice Mode] waits for player input, [Competitive Mode] (if Hand 1-9) Play menu
-	all cards turned face-down and "Card 1-5" face-down flag set (for both Player/Opponent)
+    [Practice Mode] waits for player input, [Competitive Mode] (if Hand 1-9) Play menu
+    all cards turned face-down and "Card 1-5" face-down flag set (for both Player/Opponent)
 * [Competitive Mode] End of Game
-	"Card 1-5 Held (old)" set to 0
-	music switched to win/loss music, "Cheat Card 1-5 Quantity" set to 0
-	(if won) Cash Prize Screen displayed and "Game State" set
-	(if won, when leaving Cash Prize screen) "Current Mission Games Won" set, "Cash" set to 0, "Current Mission Cash Total" set
-	(if lost, when leaving Video Poker screen) "Cash" set to 0, "Current Mission Cash Total" set
-	Score Card Screen displayed and "Game State" set
-	(when leaving Score Card screen) "Current Casino Game" set to Draw Poker
+    "Card 1-5 Held (old)" set to 0
+    music switched to win/loss music, "Cheat Card 1-5 Quantity" set to 0
+    (if won) Cash Prize Screen displayed and "Game State" set
+    (if won, when leaving Cash Prize screen) "Current Mission Games Won" set, "Cash" set to 0, "Current Mission Cash Total" set
+    (if lost, when leaving Video Poker screen) "Cash" set to 0, "Current Mission Cash Total" set
+    Score Card Screen displayed and "Game State" set
+    (when leaving Score Card screen) "Current Casino Game" set to Draw Poker
 
 Craps:
 * Game Started
-	"Current Casino Game" set to Craps
-	"Player's Cash" set
-	"Spin/Roll Outcome Flags" set to 0
-	"Is Player's Turn" set to 1, "Currently Displayed Payout Amount" set to 0, all "<Bet Type> Bet Amount" set to 0, "Combined Dice Roll" set to ?, "Established Point Number" set to 0, "Current Bet Type" set to 0, "Spin/Roll Outcome Flags" Bit1 set to 1
+    "Current Casino Game" set to Craps
+    "Player's Cash" set
+    "Spin/Roll Outcome Flags" set to 0
+    "Is Player's Turn" set to 1, "Currently Displayed Payout Amount" set to 0, all "<Bet Type> Bet Amount" set to 0, "Combined Dice Roll" set to ?, "Established Point Number" set to 0, "Current Bet Type" set to 0, "Spin/Roll Outcome Flags" Bit1 set to 1
 * Set Bet Amount
-	"Is Player's Turn" set to 0
-	"Showing Bet Results" set to 0001, "Last Bet - Total Bet Amount" set to 0
-	(as player changes amount) "Current Bet Amount" set
+    "Is Player's Turn" set to 0
+    "Showing Bet Results" set to 0001, "Last Bet - Total Bet Amount" set to 0
+    (as player changes amount) "Current Bet Amount" set
 * First Turn Started
-	"Is Player's Turn" set to 1
+    "Is Player's Turn" set to 1
 * Bet Placed
-	"Player's Cash" decreased
-	"<Bet Type> Bet Amount" and "Last Bet - Total Bet Amount" set
+    "Player's Cash" decreased
+    "<Bet Type> Bet Amount" and "Last Bet - Total Bet Amount" set
 * Roll
-	(sometimes) "Current Bet Type" set to 88
-	"Combined Dice Roll", "Die 1 Roll", and "Die 2 Roll" set, "Is Player's Turn" set to 0
-	dice animation displayed
+    (sometimes) "Current Bet Type" set to 88
+    "Combined Dice Roll", "Die 1 Roll", and "Die 2 Roll" set, "Is Player's Turn" set to 0
+    dice animation displayed
 * Bet Resolution (initialization and Come)
-	"Table Being Updated" set to 80, "Spin/Roll Outcome Flags" Bit2 set to 1, (if have point number) "Current Bet Type" set to 0e (Come), (if Come bet in play) bet resolved (per 'other bets' below), (if Come bet in play and point number rolled) "Odds Come X Bet Amount" set
+    "Table Being Updated" set to 80, "Spin/Roll Outcome Flags" Bit2 set to 1, (if have point number) "Current Bet Type" set to 0e (Come), (if Come bet in play) bet resolved (per 'other bets' below), (if Come bet in play and point number rolled) "Odds Come X Bet Amount" set
 * Bet Resolution (Don't Come)
-	(if have point number and Come bet NOT in play?) "Current Bet Type" set to 0f (Don't Come), (if Don't Come bet in play) bet resolved (per 'other bets' below), (if Don't Come bet in play and point number rolled) "Odds Don't Come X Bet Amount" set
+    (if have point number and Come bet NOT in play?) "Current Bet Type" set to 0f (Don't Come), (if Don't Come bet in play) bet resolved (per 'other bets' below), (if Don't Come bet in play and point number rolled) "Odds Don't Come X Bet Amount" set
 * Bet Resolution (other bets)
-	For each placed bet won/lost (ordering unknown - Pass/Don't Pass 2nd round before Come/Don't Come?):
-		(if lost)
-			"<Bet Type> Bet Amount" and "Currently Displayed Payout Amount" reset to 0, "Current Bet Type" set, "Spin/Roll Outcome Flags" Bit3 set to 0
-			text displayed: "lose <Bet Type>", screen starts scrolling to bet token
-			"Showing Bet Results" set to 100c
-			bet token moves to top of screen before disappearing
-		(if won)
-			"Last Payout" and "Currently Displayed Payout Amount" set, "Current Bet Type" set, "Spin/Roll Outcome Flags" Bit3 set to 1
-			text displayed: "win <Bet Type>" and flashing payout amount, screen starts scrolling to bet token
-			"<Bet Type> Bet Amount" reset to 0, "Player's Cash" increased (bet amount refunded), "Last Payout" set
-			"Showing Bet Results" set to 100c
-			"Player's Cash" increased (payout amount), bet token moves to top of screen before disappearing
-			"Currently Displayed Payout Amount" reset to 0
+    For each placed bet won/lost (ordering unknown - Pass/Don't Pass 2nd round before Come/Don't Come?):
+        (if lost)
+            "<Bet Type> Bet Amount" and "Currently Displayed Payout Amount" reset to 0, "Current Bet Type" set, "Spin/Roll Outcome Flags" Bit3 set to 0
+            text displayed: "lose <Bet Type>", screen starts scrolling to bet token
+            "Showing Bet Results" set to 100c
+            bet token moves to top of screen before disappearing
+        (if won)
+            "Last Payout" and "Currently Displayed Payout Amount" set, "Current Bet Type" set, "Spin/Roll Outcome Flags" Bit3 set to 1
+            text displayed: "win <Bet Type>" and flashing payout amount, screen starts scrolling to bet token
+            "<Bet Type> Bet Amount" reset to 0, "Player's Cash" increased (bet amount refunded), "Last Payout" set
+            "Showing Bet Results" set to 100c
+            "Player's Cash" increased (payout amount), bet token moves to top of screen before disappearing
+            "Currently Displayed Payout Amount" reset to 0
 * End of Roll
-	"Is Player's Turn" set to 1, "Table Being Updated" reset to 00, (only if sevened out?) "Last Bet - Total Bet Amount" reset to 1, "Established Point Number" set
-	"Current Bet Type" set based on player's cursor position
+    "Is Player's Turn" set to 1, "Table Being Updated" reset to 00, (only if sevened out?) "Last Bet - Total Bet Amount" reset to 1, "Established Point Number" set
+    "Current Bet Type" set based on player's cursor position
 * End of Bet Resolution
-	"Showing Bet Results" reset to 0001
+    "Showing Bet Results" reset to 0001
 * (Repeats from Bet Placed/Roll)
 
 Misc:
 Blackack: dealer stands on 17+, hits on <16, hits on "soft 17"
 
 Slots Jackpot Odds:
- 1/8000 	(without cheating)		0.0125%
-27/8000 	(gold coin)				0.3375%
-1/400  		(sevens bonus item)		0.25%		- actually might be more because not only does it make 1 column auto-win (accounted for), you can choose the column based on which one is losing (not accounted for)
-9/400  		(both)					2.25%		- actually might be more because not only does it make 1 column auto-win (accounted for), you can choose the column based on which one is losing (not accounted for)
+ 1/8000     (without cheating)      0.0125%
+27/8000     (gold coin)             0.3375%
+1/400       (sevens bonus item)     0.25%       - actually might be more because not only does it make 1 column auto-win (accounted for), you can choose the column based on which one is losing (not accounted for)
+9/400       (both)                  2.25%       - actually might be more because not only does it make 1 column auto-win (accounted for), you can choose the column based on which one is losing (not accounted for)
 
 slots jackpot reel positions: 0070 0080 0130
 starting jackpot: $250000
