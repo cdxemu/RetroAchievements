@@ -13,6 +13,8 @@ Stage 1 sphere: XPos (Mem 0x00b3) = 16-17, YPos (Mem 0x0006) = 7
 Demo Mode:
 Stage 1 (start of stage -> shoots a few times then crashes into rock, start of stage -> shoots ammo crate and falls off cliff, start of stage -> shoots a bunch of stuff then crashes into rock)
 
+"Unbreakable" test run - my deaths: 0, 1, 1, 2, 1
+
 Game Bugs/Unexpected Behavior
 -----------------------------
 * The "Stage Transition Indicator" (Mem 0x009e) still has value 0x01 (stage completed) at start of Stage 1 if you continue playing after the game ending
@@ -69,3 +71,12 @@ tank: 7154, 7457, 775a, 7a5d
 truck: 4d30
 turret (unofficial name): b699
 unknown/unsure: 19fc (tank?), 3e21 (something at end of Stage 1?), 5033 (truck/jeep?), f8db (ammo crate?), fdbe (jeep/armored car/ammo crate?)
+
+Alternative Achievement Names
+-----------------------------
+Beat Stage 1-5: "Mountain of Trouble", "Two Bridges Too Far", "Prairie Dog", "City Slicker", "Fly Away to Victory"
+Extra Life Power-up: "Why Don't You Get a Life?", "Hallelujah, It's Raining Cars!", "Cars From Heaven"
+Crash into/shoot sphere on Stage 1: "Mysterious Sphere of Mystery", "Why Is It Even There?"
+Finish Stage 2 with infinite weapon power-up active: "Speed Kills", "It's Over Already?"
+Destroy fuel barrel/drum cans in Stage 5: "No Fuel For You"
+(TBD): "I Want to Break Free" or "Break on Thru to the Other Side"

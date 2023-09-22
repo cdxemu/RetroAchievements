@@ -27,6 +27,7 @@ Per-Stage Challenges (5 of each):
 * Pacifist - beat without killing any enemies or destroying obstacles
 * Few Deaths - beat Stage 1 without dying, Stage 2-5 with less than 3 deaths each
 
+
 Added Later
 -----------
 Basic Progression:
