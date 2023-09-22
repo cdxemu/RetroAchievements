@@ -57,16 +57,19 @@ function DrawPokerOpponent_RaisedBetThisFrame() {
 //                                          Achievements
 // ************************************************************************************************
 
+// Cut Reason: 1 Cherry is too easy
 achievement("Slots Academy: Cherry Picking", "[Practice] Slots - Win any line with 1 Cherry (2x payout) or 2 Cherry (5x)", 1,
     IsPracticeMode() && IsPlayingSlots() && SlotsPlayer_PayoutThisFrame() && 
     __ornext(SlotsPlayer_WonAnyLineWith("1Cherry") || SlotsPlayer_WonAnyLineWith("2Cherry")) 
 )
 
+// Cut Reason: One Pair is too easy
 achievement("Video Poker Academy: Paired Up", "[Practice] Video Poker - Win hand with one pair of \"Jacks or better\" (1x payout) or two pair (2x)", 1,
     IsPracticeMode() && IsPlayingVideoPoker() && PlayerWonHand_ThisFrame() &&
     __ornext(PokerPlayer_WonWith("OnePair") || PokerPlayer_WonWith("TwoPair"))
 )
 
+// Cut Reason: Merged into "Ready to Take a Stand"; had problem with not being able to detect if player had a "Soft" Ace (and therefore wouldn't bust)
 achievement("Bustin' Don't Make Me Feel Good", "Blackjack - Use See Next Card when your hand value is 17 or less, revealing a card that would make you bust, then win the hand", 5,
     // TODO: need to check if player has a "soft" hand (11 pt ace) because that would prevent bust if the player just hits
     IsCompetitiveMode() && IsPlayingBlackjack() &&
@@ -74,22 +77,26 @@ achievement("Bustin' Don't Make Me Feel Good", "Blackjack - Use See Next Card wh
     BlackjackPlayer_WonEitherHandThisFrame() && never(BlackjackPlayer_StartedEitherHandThisFrame())
     , id=356435)
 
+// Cut Reason: Merged into "Ready to Take a Stand"
 achievement("I Will Not Stand For This", "Blackjack - Use See Deal Down when your hand value is 12 or more, revealing a higher-point card total, then win the hand",  5,
     IsCompetitiveMode() && IsPlayingBlackjack() && once(ActiveHandPointValue() >= 12 && BlackjackPlayer_SawDealerHandHigherThisFrame()) &&
     BlackjackPlayer_WonEitherHandThisFrame() && never(BlackjackPlayer_StartedEitherHandThisFrame())
     , id=356436)
 
+// Cut Reason: Too easy; didn't work correctly (unable to "remember" swapped card, would false trigger)
 achievement("Hey, I Was Using That!", "Video Poker - Use Swap Card to swap back a card taken from you", 2,
     // TODO: check swap cards of both player and opponent - this is hard to implement!
     // and what if opponent uses Swap Hand or two Swap Cards? maybe need to "record" player's cards at start of hand/draw with AddSource/SubSource?
     IsCompetitiveMode() && IsPlayingVideoPoker() && once(VideoPokerOpponent_UsedSwapCardCheatThisFrame()) && VideoPokerPlayer_UsedSwapCardCheatThisFrame()
     , id=356440)
 
+// Cut Reason: Merged into "Cherry Picking"/"Fruit Salad"
 achievement("Fruit Snacks", "Slots - Win any line with 2 Orange (12x payout) or 3 Orange (15x)", 2,
     IsPlayingSlots() && SlotsPlayer_PayoutThisFrame() &&
     __ornext(SlotsPlayer_WonAnyLineWith("2Orange") || SlotsPlayer_WonAnyLineWith("3Orange")) 
 )
 
+// Cut Reason: lack of player control (opponent folding seems mostly based on their hand rather than player's betting)
 achievement("Bluff Enough?", "Draw Poker - Place or raise a bet that causes your opponent to fold while your hand rank is less than one pair", 10,
     IsCompetitiveMode() && IsPlayingDrawPoker() && PlayerWonHand_ThisFrame() &&
     once(PlayersHandRankingType() == Poker_HandRankingTypeDict["None"] && DrawPokerPlayer_PlacedBet()) &&
@@ -97,21 +104,25 @@ achievement("Bluff Enough?", "Draw Poker - Place or raise a bet that causes your
     never(Increased(HandNumber())) && never(Increased(DrawNumber()))
     , id=356453)
 
+// Cut Reason: too RNG-dependent on Jackpots
 achievement("High Stakes High Roller", "Earn at least $1.5 million total end-of-mission winnings (excludes password-loaded winnings)", 25,
     IsCompetitiveMode() && TotalMissionWinnings() > 1500000
 )
 
+// Cut Reason: found to be basically impossible in testing (opponent reduces bet amount to not run out of cash)
 achievement("I Ain't Got All Day", "Blackjack - Save time by having your opponent run out of cash before Hand 10", 10,
     IsCompetitiveMode() && PlayerWonCasinoGameThisFrame("Blackjack") && HandNumber() <= 9 &&
     OpponentsCash() == 0 // this check is likely redundant because cash-out is the only way for the opponent to lose early
 )
 
+// Cut Reason: didn't work correctly (would false trigger because unable to distinguish bet raise from normal bet)
 achievement("Knew When to Hold 'Em", "Draw Poker - When your opponent raises your bet, keep playing the hand and win it", 5,
     IsCompetitiveMode() && IsPlayingDrawPoker() && PlayerWonHand_ThisFrame() &&
     once(DrawPokerPlayer_PlacedBet()) && once(DrawPokerOpponent_RaisedBetThisFrame()) &&
     never(Increased(HandNumber())) && never(Increased(DrawNumber())) 
     , id=356461)
 
+// Cut Reason: too tedious/RNG-dependent
 achievement("The Ultimate Stakes", "Defeat all five gangsters without losing any casino games (nor using a password)", 50,  
     // Count missions with all casino games won up to 5, reset at the start of competitive mode
     WonCompetitiveModeThisFrame() && repeated(5, PlayerWonAllCasinoGamesThisFrame()) && disable_when(UsedCompetitiveModePassword(), StartedCompetitiveModeNewGameThisFrame())
