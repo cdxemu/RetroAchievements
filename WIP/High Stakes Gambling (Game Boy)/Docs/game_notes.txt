@@ -184,6 +184,8 @@ Slots Jackpot Odds:
 slots jackpot reel positions: 0070 0080 0130
 starting jackpot: $250000
 
+If player/opponent tie: treated as win for both ($10K, 5 DP Credits, Player's "Game Won Flag" set)
+
 Game Bugs/Unexpected Behavior
 -----------------------------
 * Blackjack: (not a bug - seems intended) Being dealt 8+ cards causes unique display where only 5 cards are shown, with a number representing the hidden cards point value to the left

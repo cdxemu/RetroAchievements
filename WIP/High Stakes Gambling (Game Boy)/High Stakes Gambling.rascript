@@ -289,7 +289,7 @@ function UsedCompetitiveModePassword() {
     // alternatively, we might be able to check if previously at password entry screen before game started, but I think it is difficult because
     // that screen shares the same "Game State" value as the password display screen at the end of a mission
     // Caveat: not protect against potential fake/hacked passwords with no cash winnings (if such a thing exists)
-    return PlayersPasswordCashWinnings() > 0
+    return PlayersPasswordCashWinnings() != 0
 }
 
 function Winnings(mission) {
@@ -684,7 +684,7 @@ achievement("Blackjack Academy: Make Like a Banana", "[Practice] Blackjack - Spl
     , id=356410)
 
 achievement("Blackjack Academy: Psychic Training",
-    "[Practice] Blackjack - Buy or refuse insurance and have it pay off (dealer face-up ace: costs half your bet, original bet refunded if dealer has B.J.)", 1,
+    "[Practice] Blackjack - Buy or refuse insurance and have it pay off (dealer face-up ace: costs half your bet, original bet refunded if dealer has B.J.)", 2,
     IsPracticeMode() && IsPlayingBlackjack() &&
     ((BlackjackPlayer_BoughtInsurance() && DealersHandPointValue() == 21) || (BlackjackPlayer_DeclinedInsurance() && DealersHandPointValue() != 21))
     , id=356411)
@@ -743,7 +743,9 @@ WinStageAchievement(5, 3, "Nice Try, Wiseguy", 5, 356432)
 WinStageAchievement(5, 4, "Ding, Don Done", 10, 356433)
 
 achievement("Brought Down the Mob", "Beat the game without using a password", 25,
-    WonCompetitiveModeThisFrame() && disable_when(UsedCompetitiveModePassword(), StartedCompetitiveModeNewGameThisFrame())
+//    WonCompetitiveModeThisFrame() && disable_when(UsedCompetitiveModePassword(), StartedCompetitiveModeNewGameThisFrame())
+    // Revised/simplified to not use PauseLock
+    WonCompetitiveModeThisFrame() && !UsedCompetitiveModePassword()
     , id=356434)
 
 // ----------------------------------------------
@@ -880,9 +882,10 @@ achievement("Sus Hands Are Afoot", "Blackjack - Make your opponent bust with a \
     , id=356457)
 
 achievement("Forever 21", "Blackjack - Score at least five Blackjacks in one game", 5,
-    IsCompetitiveMode() && IsPlayingBlackjack() && never(StartedMissionThisFrame()) &&
+    IsPlayingBlackjack() && never(StartedMissionThisFrame()) &&
     // Used tally() instead of repeated() to avoid "combined || and && logic too complex for subclause" compile error
-    measured(tally(5, BlackjackPlayer_WonMainHandWithBlackjackThisFrame(), BlackjackPlayer_WonSplitHandWithBlackjackThisFrame()))
+    // Also moved IsCompetitiveMode() inside tally() so that the count doesn't increase while in practice mode (though it would be reset before triggering)
+    measured(tally(5, IsCompetitiveMode() && BlackjackPlayer_WonMainHandWithBlackjackThisFrame(), IsCompetitiveMode() && BlackjackPlayer_WonSplitHandWithBlackjackThisFrame()))
     , id=356458)
 
 achievement("What Big Hands You Have", "Blackjack - Have eight cards in your hand (bust allowed on last card)", 10,
