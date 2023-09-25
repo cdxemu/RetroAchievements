@@ -20,7 +20,8 @@ function CombinedDiceRoll() => byte(0x00C2B4)
 function MenuProperty() => byte(0x00C2BC)
 MenuPropertyDict = {"Insurance": 0x08}
 function CompetitiveProgressIndicator() => low4(0x00C2C5)
-CompetitiveProgressIndicatorDict = {"Started": 0x6}
+CompetitiveProgressIndicatorDict = {"Started1P": 0x6}
+function TwoPlayerGameFlag() => bit0(0x00C2C5)
 function CurrentMission() => byte(0x00C2C6)
 function CasinoGameMode() => byte(0x00C2C7)
 CasinoGameModeDict = {"Practice": 0x00, "Competitive": 0x04}
@@ -196,8 +197,10 @@ function IsPlayingDrawPoker() => CurrentCasinoGame() == CurrentCasinoGameDict["D
 function IsPlayingCraps() => CurrentCasinoGame() == CurrentCasinoGameDict["Craps"]
 function IsPlayingPoker() => __ornext(IsPlayingDrawPoker() || IsPlayingVideoPoker())
 
-function IsPracticeMode() => CasinoGameMode() == CasinoGameModeDict["Practice"]
-function IsCompetitiveMode() => CompetitiveProgressIndicator() == CompetitiveProgressIndicatorDict["Started"]
+// Checking for 2P in Practice Mode seems unneccessary because you only play against the dealer or yourself, so it doesn't confer any advantage and 
+// certainly isn't worth the trouble of setting it up with Game Link and 2 game instances and getting that to work (it tends to reset/freeze/crash).
+function IsPracticeMode() => CasinoGameMode() == CasinoGameModeDict["Practice"] // && TwoPlayerGameFlag() == 0
+function IsCompetitiveMode() => CompetitiveProgressIndicator() == CompetitiveProgressIndicatorDict["Started1P"]
 
 function GetGangsterName(mission_num) {
     if (mission_num == 1)
@@ -274,7 +277,7 @@ function StartedMissionThisFrame() {
     return IsAtScreen("GangsterPortrait") && Changed(GameState())
 }
 
-function StartedCompetitiveModeThisFrame() => IsCompetitiveMode() && prev(CompetitiveProgressIndicator()) != CompetitiveProgressIndicatorDict["Started"]
+function StartedCompetitiveModeThisFrame() => IsCompetitiveMode() && prev(CompetitiveProgressIndicator()) != CompetitiveProgressIndicatorDict["Started1P"]
 function StartedCompetitiveModeNewGameThisFrame() => StartedCompetitiveModeThisFrame() && DisplayedMissionNumber() == 1
 
 function WonMissionThisFrame() => PlayerWonCasinoGameThisFrame(FinalCasinoGameName)
@@ -1020,6 +1023,9 @@ RP_CashBCD = rich_presence_value("Number", bcd(PlayersCashBCD()))
 
 // Display if at Title Screen/Menus
 rich_presence_conditional_display(RP_IsAtMenu, "[Title Screen/Menu]")
+
+// Display if started 2-Player game (not allowed for achievements/leaderboards)
+rich_presence_conditional_display(TwoPlayerGameFlag() == 1, "🔴 2P Game 🔴")
 
 // Display if at Mission Start/End (in Competitive Mode)
 rich_presence_conditional_display(IsCompetitiveMode() && RP_IsBetweenMissions,
