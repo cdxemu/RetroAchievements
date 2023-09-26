@@ -845,13 +845,13 @@ achievement("High Five!", "Video Poker - Win the jackpot with 5 of a Kind (requi
 // Optional (Misc) Achievements
 // ----------------------------------------------
 
-achievement("Mob Money, Mob Problems", "Draw Poker - Defeat any gangster by making him run out of cash", 4,
+achievement("Mob Money, Mob Problems", "Draw Poker - Defeat any gangster by making him run out of cash", 3,
     // Note: If the gangster both runs out of cash AND draw poker credits at the same time, the game treats it as running out of cash, 
     // so it is unnecessary to also check the draw poker credits value.
     IsCompetitiveMode() && PlayerWonCasinoGameThisFrame(FinalCasinoGameName) && OpponentsCash() == 0
     , id=356451)
 
-achievement("Unmade Man", "Draw Poker - Defeat any gangster by making him run out of Draw Poker Credits", 4,
+achievement("Unmade Man", "Draw Poker - Defeat any gangster by making him run out of Draw Poker Credits", 3,
     IsCompetitiveMode() && PlayerWonCasinoGameThisFrame(FinalCasinoGameName) && OpponentsCash() > 0
     , id=356452)
 
