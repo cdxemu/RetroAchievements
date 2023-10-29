@@ -148,7 +148,7 @@ Craps:
     "Combined Dice Roll", "Die 1 Roll", and "Die 2 Roll" set, "Is Player's Turn" set to 0
     dice animation displayed
 * Bet Resolution (initialization and Come)
-    "Table Being Updated" set to 80, "Spin/Roll Outcome Flags" Bit2 set to 1, (if have point number) "Current Bet Type" set to 0e (Come), (if Come bet in play) bet resolved (per 'other bets' below), (if Come bet in play and point number rolled) "Odds Come X Bet Amount" set
+    "Table Being Updated" Bit7 set to 1, "Spin/Roll Outcome Flags" Bit2 set to 1, (if have point number) "Current Bet Type" set to 0e (Come), (if Come bet in play) bet resolved (per 'other bets' below), (if Come bet in play and point number rolled) "Odds Come X Bet Amount" set
 * Bet Resolution (Don't Come)
     (if have point number and Come bet NOT in play?) "Current Bet Type" set to 0f (Don't Come), (if Don't Come bet in play) bet resolved (per 'other bets' below), (if Don't Come bet in play and point number rolled) "Odds Don't Come X Bet Amount" set
 * Bet Resolution (other bets)
@@ -166,7 +166,7 @@ Craps:
             "Player's Cash" increased (payout amount), bet token moves to top of screen before disappearing
             "Currently Displayed Payout Amount" reset to 0
 * End of Roll
-    "Is Player's Turn" set to 1, "Table Being Updated" reset to 00, (only if sevened out?) "Last Bet - Total Bet Amount" reset to 1, "Established Point Number" set
+    "Is Player's Turn" set to 1, "Table Being Updated" Bit7 reset to 0, (only if sevened out?) "Last Bet - Total Bet Amount" reset to 1, "Established Point Number" set, "Spin/Roll Outcome Flags" Bit3 set to 0, (sometimes) "Current Bet Type" set to 88
     "Current Bet Type" set based on player's cursor position
 * End of Bet Resolution
     "Showing Bet Results" reset to 0001

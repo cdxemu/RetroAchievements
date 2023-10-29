@@ -158,6 +158,7 @@ function AnyCrapsBetAmount() => word(0x00D534)
 function CAndEBetAmount() => word(0x00D536)
 function PassOddsBetAmount() => word(0x00D59A)
 function DontPassOddsBetAmount() => word(0x00D59C)
+function IsTableBeingUpdated() => bit7(0x00D642)
 function PlayersActualBetAmountBCD() => word_be(0x00D64A)
 function IsCrapsPlayersTurn() => byte(0x00D659)
 function IsCasinoGameActive() => byte(0x00FFB7)
@@ -547,9 +548,8 @@ function CrapsRoll_IsNatural() => CombinedDiceRoll() == 7 || CombinedDiceRoll() 
 function CrapsRoll_IsCraps() => CombinedDiceRoll() == 2 || CombinedDiceRoll() == 3 || CombinedDiceRoll() == 12
 function CrapsRoll_IsPoint() => CombinedDiceRoll() == EstablishedPointNumber()
 
-function CrapsPlayer_TurnPaused() => IsCrapsPlayersTurn() == 0
-function CrapsPlayer_TurnEnded() => Decreased(IsCrapsPlayersTurn())
-function CrapsPlayer_TurnStarted() => Increased(IsCrapsPlayersTurn())
+function Craps_IsBetResolution() => IsTableBeingUpdated() == 1
+function Craps_PlayerTurnStarted() => Increased(IsCrapsPlayersTurn())
 
 function GetCrapsBetAmount(bet_type) {
     if (bet_type == "Pass") return PassBetAmount()
@@ -636,7 +636,7 @@ for bet_amount in MultiBetAmounts {array_push(AllBetAmounts, bet_amount)}
 // Note: This function does not work for "Any Craps" and other single-roll bets that are not zeroed out/removed from table when won (game bug?)
 function CrapsPlayer_WonBetThisFrameByAmount(bet_amount) {
     // When a bet is won, the associated bet amount is zeroed out on the same frame the player's cash is increased (to refund the bet amount)
-    return CrapsPlayer_TurnPaused() && ZeroedOut(bet_amount) && Increased(PlayersCashBCD())
+    return ZeroedOut(bet_amount) && Increased(PlayersCashBCD())
 }
 
 function CrapsPlayer_HadBetOn(bet_type) => prev(GetCrapsBetAmount(bet_type)) > 0
@@ -648,7 +648,7 @@ function CrapsPlayer_WonBetThisFrame(bet_type) {
         // version of this function instead (which didn't work with "Any Craps" and other single-roll bets).
         return CrapsPlayer_WonBetThisFrameByAmount(GetCrapsBetAmount(bet_type))
     else
-        return CrapsPlayer_TurnPaused() && CrapsPlayer_HadBetOn(bet_type) && CrapsBetType() == CrapsBetTypeDict[bet_type] && IsCrapsBetWon() == 1
+        return CrapsPlayer_HadBetOn(bet_type) && CrapsBetType() == CrapsBetTypeDict[bet_type] && IsCrapsBetWon() == 1
 }
 
 function CrapsPlayer_WonLineBets(bet_count) => tally_of(LineBetTypes, bet_count, bet_type => once(CrapsPlayer_WonBetThisFrame(bet_type)))
@@ -661,7 +661,7 @@ function CrapsPlayer_PlacedBet(bet_amount) {
     // Note: Ideally we could move CrapsPlayer_TurnEnded() outside the tally so it isn't duplicated for each bet type, but that doesn't seem
     // possible with RAScript (replacing tally_of() with tally(any_of()) didn't work either, because while it would generate an OrNext chain, it
     // only checks if ANY bet is >0 X times, rather than if X bets are >0). I think this might be a case where ResetNextIf would help.
-    return CrapsPlayer_TurnEnded() && bet_amount > 0
+    return bet_amount > 0
 }
 
 function CrapsPlayer_PlacedBets(bet_count) => tally_of(AllBetAmounts, bet_count, bet_amount => once(CrapsPlayer_PlacedBet(bet_amount)))
@@ -932,46 +932,47 @@ achievement("Al Col-Owned", "Complete Mission 5 with at least 12 Draw Poker Cred
 // ----------------------------------------------
 
 achievement("Craps Academy: It's Only Natural", "Craps - Win a Pass line bet by rolling a \"natural\" (7 or 11) on the come-out roll", 1,
-    IsPlayingCraps() && CrapsRoll_IsNatural() && CrapsPlayer_WonBetThisFrame("Pass")
+    IsPlayingCraps() && CrapsRoll_IsNatural() && Craps_IsBetResolution() && CrapsPlayer_WonBetThisFrame("Pass")
     , id=356467)
 
 achievement("Craps Academy: Got the Craps", "Craps - Win a Don't Pass line bet by rolling \"craps\" (2 or 3 to win, 12 to push) on the come-out roll", 1,
-    IsPlayingCraps() && CrapsRoll_IsCraps() && CrapsPlayer_WonBetThisFrame("DontPass")
+    IsPlayingCraps() && CrapsRoll_IsCraps() && Craps_IsBetResolution() && CrapsPlayer_WonBetThisFrame("DontPass")
     , id=356468)
 
 achievement("Craps Academy: Come to Papa", "Craps - Establish a \"point number\" (4-6 or 8-10) on the come-out roll, then win a Come line bet by rolling 7 or 11", 1,
-    IsPlayingCraps() && CrapsRoll_IsNatural() && CrapsPlayer_WonBetThisFrame("Come")
+    IsPlayingCraps() && CrapsRoll_IsNatural() && Craps_IsBetResolution() && CrapsPlayer_WonBetThisFrame("Come")
     , id=356469)
 
 achievement("Craps Academy: Mama Told Me Not To", "Craps - Establish a \"point number\" (4-6 or 8-10) on the come-out roll, then win a Don't Come line bet by rolling 2 or 3 (12 to push)", 1,
-    IsPlayingCraps() && CrapsRoll_IsCraps() && CrapsPlayer_WonBetThisFrame("DontCome")
+    IsPlayingCraps() && CrapsRoll_IsCraps() && Craps_IsBetResolution() && CrapsPlayer_WonBetThisFrame("DontCome")
     , id=356470)
 
 achievement("Craps Academy: OK, I Get the Point",
     "Craps - Establish a \"point number\" (4-6 or 8-10) on the come-out roll, then win a Pass line bet by rerolling the point number", 1,
-    IsPlayingCraps() && CrapsRoll_IsPoint() && (CrapsPlayer_WonBetThisFrame("Pass") || CrapsPlayer_WonBetThisFrame("PassOdds"))
+    IsPlayingCraps() && CrapsRoll_IsPoint() && Craps_IsBetResolution() &&  (CrapsPlayer_WonBetThisFrame("Pass") || CrapsPlayer_WonBetThisFrame("PassOdds"))
     , id=356471)
 
 achievement("Craps Academy: What's in the Box?",
     "Craps - Establish a \"point number\" (4-6 or 8-10) on the come-out roll, then win a Don't Pass line bet by \"sevening out\" (roll a 7)", 1,
-    IsPlayingCraps() && CombinedDiceRoll() == 7 && (CrapsPlayer_WonBetThisFrame("DontPass") || CrapsPlayer_WonBetThisFrame("DontPassOdds"))
+    IsPlayingCraps() && CombinedDiceRoll() == 7 && Craps_IsBetResolution() && (CrapsPlayer_WonBetThisFrame("DontPass") || CrapsPlayer_WonBetThisFrame("DontPassOdds"))
     , id=356472)
 
 achievement("Craps Academy: Crapshoot", "Craps - Win at least 5 different single-roll bets (Craps #, Seven, Yoleven, Any Craps, C & E, Horn, Field)", 2,
-    IsPlayingCraps() && measured(CrapsPlayer_WonSingleRollBets(5)) && // internally uses tally w/ hit counts to track bets won
+    IsPlayingCraps() && unless(!Craps_IsBetResolution()) && measured(CrapsPlayer_WonSingleRollBets(5)) && // internally uses tally w/ hit counts to track bets won
     // Only reset count if player exits craps
     never(!IsPlayingCraps())
     , id=356473)
 
 achievement("Craps Academy: Rollin', Rollin', Rollin'", "Craps - Win at least 5 different multi-roll bets (Place #, Buy #, Lay #, Hard #, Big #)", 2,
-    IsPlayingCraps() && measured(CrapsPlayer_WonMultiRollBets(5)) && // internally uses tally w/ hit counts to track bets won
+    IsPlayingCraps() && unless(!Craps_IsBetResolution()) && measured(CrapsPlayer_WonMultiRollBets(5)) && // internally uses tally w/ hit counts to track bets won
     // Only reset count if player exits craps
     never(!IsPlayingCraps())
     , id=356474)
 
 achievement("Putting It All Together", "Craps - Win a line, multi-roll, and single-roll bet on the same roll (without any other bets on the table)", 5,
-    IsPlayingCraps() && unless(CrapsPlayer_PlacedBets(4)) && CrapsPlayer_WonLineBets(1) && CrapsPlayer_WonSingleRollBets(1) && CrapsPlayer_WonMultiRollBets(1) &&
-    (always_true() || never(CrapsPlayer_TurnStarted()))
+    IsPlayingCraps() && unless(!Craps_IsBetResolution()) && unless(CrapsPlayer_PlacedBets(4)) && 
+    CrapsPlayer_WonLineBets(1) && CrapsPlayer_WonSingleRollBets(1) && CrapsPlayer_WonMultiRollBets(1) &&
+    (always_true() || never(Craps_PlayerTurnStarted())) 
     , id=356475)
 
 achievement("Craptastic", "Craps - Have exactly 9 bets on the table and win them all on the same roll", 10,
@@ -980,8 +981,8 @@ achievement("Craptastic", "Craps - Have exactly 9 bets on the table and win them
     //   1. Bet on: Don't Pass, Come (or Don't Come X), Seven, Lay 4/5/6/8/9/10
     //   2. Roll a 7
     //   (Note: this can't be done on the come-out roll)
-    IsPlayingCraps() && unless(CrapsPlayer_PlacedBets(10)) && CrapsPlayer_WonAnyBets(9) &&
-    (always_true() || never(CrapsPlayer_TurnStarted()))
+    IsPlayingCraps() && unless(!Craps_IsBetResolution()) && unless(CrapsPlayer_PlacedBets(10)) && CrapsPlayer_WonAnyBets(9) &&
+    (always_true() || never(Craps_PlayerTurnStarted()))
     , id=356476)
 
 achievement("Baby Needs New Shoes!", "Craps - Starting with $10,000, double your money", 10,
