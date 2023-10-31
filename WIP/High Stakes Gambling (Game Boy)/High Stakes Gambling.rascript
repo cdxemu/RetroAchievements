@@ -14,7 +14,7 @@ function ControllerInputAFlag() => bit0(0x00C2AE)
 function CurrentCasinoGame() => byte(0x00C2B1)
 CurrentCasinoGameDict = {"Blackjack": 0x01, "Craps": 0x02, "DrawPoker": 0x04, "Slots": 0x08, "VideoPoker": 0x10}
 function GameState() => byte(0x00C2B2)
-GameStateDict = {"MissionScore": 0x01, "GangsterPortrait": 0x02, "CashPrize": 0x04, "ModeOrPlayPasswordSelect": 0x05, "Shady": 0x06,
+GameStateDict = {"MissionScore": 0x01, "GangsterPortrait": 0x02, "CashPrize": 0x04, "ModeOrPlayPasswordSelect": 0x05, "Shady": 0x06, "BlackjackOrDrawPoker": 0x08,
     "TitleScreen": 0x09, "ScoreCard": 0x0B, "CopyrightScreen": 0x20}
 function CombinedDiceRoll() => byte(0x00C2B4)
 function MenuProperty() => byte(0x00C2BC)
@@ -873,7 +873,9 @@ achievement("High Stakes High Roller", "Earn at least $350,000 end-of-mission wi
     , id=356455)
 
 achievement("Depression-Era Millionaire", "Earn at least $1 million total end-of-mission winnings (excludes password-loaded winnings)", 10,
-    IsCompetitiveMode() && TotalMissionWinnings() > 1000000
+    // Added game state check to prevent false trigger upon starting game with Gearboy core (which initializes cash winnings to 0xffff or 0xf0f0 instead of 0x0000):
+    // Cash winnings are set on the final frame of the Draw Poker game state (one frame before the state changes to Post-Mission Cutscene/Score)
+    IsCompetitiveMode() && IsAtScreen("BlackjackOrDrawPoker") && TotalMissionWinnings() >= 1000000
     , id=356456)
 
 // ----------------------------------------------
